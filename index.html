@@ -2216,150 +2216,151 @@ LIVE API
 
 async function fetchLiveGold(){
 
-  const api = document.getElementById("apiStatus");
-  const source = document.getElementById("priceSource");
+    const api = document.getElementById("apiStatus");
+    const source = document.getElementById("priceSource");
 
-  try {
+    try {
 
-    api.innerText = "● API CONNECTING";
-    api.className = "api-status";
+        api.innerText = "● API CONNECTING";
+        api.className = "api-status";
 
-    const response = await fetch(
-      "/api/scalp?ts=" + Date.now(),
-      {
-        cache: "no-store"
-      }
-    );
+        const response = await fetch(
+            "/api/scalp?ts=" + Date.now(),
+            {
+                cache: "no-store"
+            }
+        );
 
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!data.ok) {
+            throw new Error(
+                data.error || "Scalp API error"
+            );
+        }
+
+        // ==========================================
+        // AMBIL CANDLE DARI /api/scalp
+        // ==========================================
+
+        const raw = data.candles;
+
+        if (!Array.isArray(raw) || !raw.length) {
+            throw new Error("Tiada candle dari scalp API");
+        }
+
+        candles = raw
+            .map(x => ({
+                time: x.datetime || x.time,
+                open: num(x.open),
+                high: num(x.high),
+                low: num(x.low),
+                close: num(x.close),
+                volume: num(x.volume) || 0
+            }))
+            .filter(x =>
+                isFinite(x.open) &&
+                isFinite(x.high) &&
+                isFinite(x.low) &&
+                isFinite(x.close)
+            )
+            .sort(
+                (a, b) =>
+                    new Date(a.time) -
+                    new Date(b.time)
+            );
+
+        if (!candles.length) {
+            throw new Error("Candle invalid");
+        }
+
+        // ==========================================
+        // LIVE PRICE
+        // ==========================================
+
+        const livePrice =
+            Number(
+                data.livePrice?.price ??
+                data.price ??
+                candles[candles.length - 1].close
+            );
+
+        if (!Number.isFinite(livePrice)) {
+            throw new Error("Live price invalid");
+        }
+
+        previousPrice = currentPrice;
+        currentPrice = livePrice;
+
+        // ==========================================
+        // UPDATE DASHBOARD PRICE
+        // ==========================================
+
+        document.getElementById("livePrice").innerText =
+            currentPrice.toFixed(2);
+
+        document.getElementById("priceInput").value =
+            currentPrice.toFixed(2);
+
+        document.getElementById("riskEntry").value =
+            currentPrice.toFixed(2);
+
+        document.getElementById("chartPrice").innerText =
+            currentPrice.toFixed(2);
+
+        // ==========================================
+        // SOURCE
+        // ==========================================
+
+        const priceSource =
+            data.livePrice?.source ||
+            "TWELVE_DATA";
+
+        source.innerText =
+            priceSource +
+            " • Live Price • " +
+            formatUpdateTime();
+
+        // ==========================================
+        // API STATUS
+        // ==========================================
+
+        api.innerText = "● LIVE API";
+        api.className = "api-status";
+
+        document.getElementById("chartLive").innerText =
+            "● LIVE";
+
+        // ==========================================
+        // DRAW CHART
+        // ==========================================
+
+        drawChart();
+
+        // ==========================================
+        // SCALP ENGINE
+        // ==========================================
+
+        await runScalpEngine(data);
+
+    } catch (e) {
+
+        console.error("fetchLiveGold:", e);
+
+        api.innerText = "● API ERROR";
+        api.className =
+            "api-status api-error";
+
+        source.innerText =
+            "API gagal — cuba lagi";
+
+        document.getElementById("chartLive").innerText =
+            "● OFFLINE";
     }
-
-    const data = await response.json();
-
-    if (!data.ok) {
-      throw new Error(
-        data.error || "API response invalid"
-      );
-    }
-
-    if (!Array.isArray(data.candles) || !data.candles.length) {
-      throw new Error("Tiada candle");
-    }
-
-    // ===============================
-    // CANDLES
-    // ===============================
-
-    candles = data.candles
-      .map(x => ({
-        time: x.datetime || x.time,
-        open: num(x.open),
-        high: num(x.high),
-        low: num(x.low),
-        close: num(x.close),
-        volume: num(x.volume) || 0
-      }))
-      .filter(x =>
-        x.time &&
-        isFinite(x.open) &&
-        isFinite(x.high) &&
-        isFinite(x.low) &&
-        isFinite(x.close)
-      )
-      .sort(
-        (a,b) =>
-          new Date(a.time) - new Date(b.time)
-      );
-
-    if (!candles.length) {
-      throw new Error("Candle invalid");
-    }
-
-    // ===============================
-    // LIVE PRICE
-    // ===============================
-
-    const livePrice =
-      Number(data.livePrice?.price) ||
-      Number(data.price) ||
-      candles[candles.length - 1].close;
-
-    if (!isFinite(livePrice)) {
-      throw new Error("Live price invalid");
-    }
-
-    previousPrice = currentPrice;
-    currentPrice = livePrice;
-
-    // ===============================
-    // UPDATE UI
-    // ===============================
-
-    document.getElementById("livePrice").innerText =
-      currentPrice.toFixed(2);
-
-    document.getElementById("priceInput").value =
-      currentPrice.toFixed(2);
-
-    document.getElementById("riskEntry").value =
-      currentPrice.toFixed(2);
-
-    document.getElementById("chartPrice").innerText =
-      currentPrice.toFixed(2);
-
-    // ===============================
-    // SOURCE
-    // ===============================
-
-    const liveSource =
-      data.livePrice?.source ||
-      "TWELVE_DATA_PRICE";
-
-    const liveAge =
-      Number(data.livePrice?.ageSeconds || 0);
-
-    source.innerText =
-      "Twelve Data • Live Price • " +
-      liveSource +
-      " • " +
-      liveAge +
-      "s • " +
-      formatUpdateTime();
-
-    // ===============================
-    // STATUS
-    // ===============================
-
-    api.innerText = "● LIVE API";
-    api.className = "api-status";
-
-    document.getElementById("chartLive").innerText =
-      "● LIVE";
-
-    drawChart();
-
-    await runScalpEngine();
-
-  } catch(e) {
-
-    console.error(
-      "fetchLiveGold ERROR:",
-      e
-    );
-
-    api.innerText = "● API ERROR";
-    api.className =
-      "api-status api-error";
-
-    source.innerText =
-      "API gagal — " +
-      (e.message || "Unknown error");
-
-    document.getElementById("chartLive").innerText =
-      "● OFFLINE";
-  }
-
 }
 
     
