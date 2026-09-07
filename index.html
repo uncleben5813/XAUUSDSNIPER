@@ -2225,7 +2225,7 @@ async function fetchLiveGold(){
     api.className = "api-status";
 
     const response = await fetch(
-      "/api/xau?ts=" + Date.now(),
+      "/api/scalp?ts=" + Date.now(),
       {
         cache: "no-store"
       }
@@ -2237,10 +2237,6 @@ async function fetchLiveGold(){
 
     const data = await response.json();
 
-    // =====================================================
-    // NEW V10 API FORMAT
-    // =====================================================
-
     if (!data.ok) {
       throw new Error(
         data.error || "API response invalid"
@@ -2251,9 +2247,9 @@ async function fetchLiveGold(){
       throw new Error("Tiada candle");
     }
 
-    // =====================================================
+    // ===============================
     // CANDLES
-    // =====================================================
+    // ===============================
 
     candles = data.candles
       .map(x => ({
@@ -2272,7 +2268,7 @@ async function fetchLiveGold(){
         isFinite(x.close)
       )
       .sort(
-        (a, b) =>
+        (a,b) =>
           new Date(a.time) - new Date(b.time)
       );
 
@@ -2280,9 +2276,9 @@ async function fetchLiveGold(){
       throw new Error("Candle invalid");
     }
 
-    // =====================================================
+    // ===============================
     // LIVE PRICE
-    // =====================================================
+    // ===============================
 
     const livePrice =
       Number(data.livePrice?.price) ||
@@ -2293,15 +2289,12 @@ async function fetchLiveGold(){
       throw new Error("Live price invalid");
     }
 
-    const candlePrice =
-      candles[candles.length - 1].close;
-
     previousPrice = currentPrice;
     currentPrice = livePrice;
 
-    // =====================================================
-    // UPDATE PRICE UI
-    // =====================================================
+    // ===============================
+    // UPDATE UI
+    // ===============================
 
     document.getElementById("livePrice").innerText =
       currentPrice.toFixed(2);
@@ -2315,16 +2308,16 @@ async function fetchLiveGold(){
     document.getElementById("chartPrice").innerText =
       currentPrice.toFixed(2);
 
-    // =====================================================
+    // ===============================
     // SOURCE
-    // =====================================================
+    // ===============================
 
     const liveSource =
       data.livePrice?.source ||
       "TWELVE_DATA_PRICE";
 
     const liveAge =
-      Number(data.livePrice?.ageSeconds ?? 0);
+      Number(data.livePrice?.ageSeconds || 0);
 
     source.innerText =
       "Twelve Data • Live Price • " +
@@ -2334,9 +2327,9 @@ async function fetchLiveGold(){
       "s • " +
       formatUpdateTime();
 
-    // =====================================================
-    // API STATUS
-    // =====================================================
+    // ===============================
+    // STATUS
+    // ===============================
 
     api.innerText = "● LIVE API";
     api.className = "api-status";
@@ -2344,21 +2337,16 @@ async function fetchLiveGold(){
     document.getElementById("chartLive").innerText =
       "● LIVE";
 
-    // =====================================================
-    // CHART
-    // =====================================================
-
     drawChart();
-
-    // =====================================================
-    // SCALP ENGINE
-    // =====================================================
 
     await runScalpEngine();
 
-  } catch (e) {
+  } catch(e) {
 
-    console.error("fetchLiveGold ERROR:", e);
+    console.error(
+      "fetchLiveGold ERROR:",
+      e
+    );
 
     api.innerText = "● API ERROR";
     api.className =
