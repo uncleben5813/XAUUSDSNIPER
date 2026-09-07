@@ -1385,6 +1385,10 @@ let lastSignalPrice=0;
 const SIGNAL_COOLDOWN=15*60*1000;
 const MIN_SCORE=75;
 
+const LIVE_REFRESH_MS=5000;
+let liveFetchBusy=false;
+let liveRefreshTimer=null;
+
 
 /* =========================================================
 HELPERS
@@ -2216,6 +2220,9 @@ LIVE API
 
 async function fetchLiveGold(){
 
+    if(liveFetchBusy) return;
+    liveFetchBusy=true;
+
     const api = document.getElementById("apiStatus");
     const source = document.getElementById("priceSource");
 
@@ -2395,9 +2402,18 @@ async function fetchLiveGold(){
             chartLive.innerText =
                 "● OFFLINE";
         }
+    } finally {
+        liveFetchBusy=false;
     }
 }
 
+function scheduleLiveRefresh(){
+    if(liveRefreshTimer) clearTimeout(liveRefreshTimer);
+    liveRefreshTimer=setTimeout(async()=>{
+        await fetchLiveGold();
+        scheduleLiveRefresh();
+    },LIVE_REFRESH_MS);
+}
 
 
 /* =========================================================
@@ -5298,6 +5314,7 @@ renderHistory();
 updateRiskCalculator();
 updateNotificationStatus();
 fetchLiveGold();
+scheduleLiveRefresh();
 
 }
 );
@@ -5306,11 +5323,6 @@ fetchLiveGold();
 /* =========================================================
 INTERVALS
 ========================================================= */
-
-setInterval(
-fetchLiveGold,
-60000
-);
 
 setInterval(
 updateSessions,
