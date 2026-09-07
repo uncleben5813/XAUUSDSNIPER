@@ -6,8 +6,3 @@
     "api/push-send.js": { "maxDuration": 10 },
     "api/push-subscribe.js": { "maxDuration": 10 },
     "api/push-config.js": { "maxDuration": 10 }
-  },
-  "crons": [
-    { "path": "/api/push-check", "schedule": "* * * * *" }
-  ]
-}
