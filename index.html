@@ -704,55 +704,6 @@ gap:4px
 </head>
 
 <body>
-<style>
-#v10AllDataPanel{position:relative;z-index:10;margin:12px;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(10,14,20,.92);color:#e8edf5;font-family:inherit}#v10AllDataPanel h2{margin:0 0 8px;font-size:18px}#v10AllDataPanel .v10meta{font-size:12px;opacity:.72;margin-bottom:12px}.v10row{border:1px solid rgba(255,255,255,.08);border-radius:10px;margin:7px 0;overflow:hidden}.v10row>summary{cursor:pointer;padding:10px 12px;font-weight:700;list-style:none}.v10row>summary::-webkit-details-marker{display:none}.v10content{padding:8px 12px 12px;border-top:1px solid rgba(255,255,255,.07);overflow:auto}.v10kv{display:grid;grid-template-columns:minmax(130px,220px) 1fr;gap:6px 12px;font-size:12px}.v10key{opacity:.7}.v10val{word-break:break-word}.v10array{padding-left:8px}.v10item{border-left:2px solid rgba(255,255,255,.1);padding-left:10px;margin:5px 0}.v10null{opacity:.5}.v10true{font-weight:700}.v10json{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;white-space:pre-wrap;word-break:break-word;margin:0}.v10toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.v10btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:inherit;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer}
-</style>
-<section id="v10AllDataPanel">
-  <h2>V10 — FULL API DATA</h2>
-  <div class="v10meta" id="v10AllDataMeta">Waiting for /api/scalp response…</div>
-  <div class="v10toolbar"><button class="v10btn" type="button" id="v10ExpandAll">Expand all</button><button class="v10btn" type="button" id="v10CollapseAll">Collapse all</button></div>
-  <div id="v10AllDataBody"></div>
-</section>
-<script>
-(function(){
-  const panel=document.getElementById('v10AllDataPanel');
-  const body=document.getElementById('v10AllDataBody');
-  const meta=document.getElementById('v10AllDataMeta');
-  if(!panel||!body) return;
-  function esc(v){return String(v).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));}
-  function primitive(v){
-    if(v===null) return '<span class="v10null">null</span>';
-    if(typeof v==='boolean') return '<span class="v10true">'+v+'</span>';
-    if(typeof v==='number') return '<span>'+esc(Number.isFinite(v)?v:'NaN')+'</span>';
-    if(typeof v==='string') return '<span>'+esc(v)+'</span>';
-    return '<span>'+esc(String(v))+'</span>';
-  }
-  function renderValue(v, depth){
-    if(v===null||typeof v!=='object') return primitive(v);
-    if(Array.isArray(v)){
-      if(!v.length) return '<div class="v10null">[]</div>';
-      return '<div class="v10array">'+v.map((x,i)=>'<div class="v10item"><div class="v10key">['+i+']</div>'+renderValue(x,depth+1)+'</div>').join('')+'</div>';
-    }
-    const keys=Object.keys(v);
-    if(!keys.length) return '<div class="v10null">{}</div>';
-    return '<div class="v10kv">'+keys.map(k=>'<div class="v10key">'+esc(k)+'</div><div class="v10val">'+renderValue(v[k],depth+1)+'</div>').join('')+'</div>';
-  }
-  window.renderV10AllData=function(data){
-    if(!data) return;
-    const keys=Object.keys(data);
-    meta.textContent='LIVE • '+(data.symbol||'XAU/USD')+' • '+(data.version||'V10')+' • '+new Date().toLocaleString();
-    body.innerHTML=keys.map((k,i)=>{
-      const v=data[k];
-      const isObj=v&&typeof v==='object';
-      const summary=esc(k)+' <span style="opacity:.55;font-weight:400">'+(Array.isArray(v)?'['+v.length+' items]':isObj?'{object}':': '+esc(v))+'</span>';
-      return isObj?'<details class="v10row" '+(i<8?'open':'')+'><summary>'+summary+'</summary><div class="v10content">'+renderValue(v,0)+'</div></details>':'<div class="v10row"><div style="padding:10px 12px"><b>'+esc(k)+'</b>: '+primitive(v)+'</div></div>';
-    }).join('');
-  };
-  document.getElementById('v10ExpandAll')?.addEventListener('click',()=>body.querySelectorAll('details').forEach(x=>x.open=true));
-  document.getElementById('v10CollapseAll')?.addEventListener('click',()=>body.querySelectorAll('details').forEach(x=>x.open=false));
-})();
-</script>
-
 
 <div class="container">
 
@@ -2293,15 +2244,6 @@ async function fetchLiveGold(){
 
         const data = await response.json();
 
-        // IMPORTANT: render the complete API response immediately.
-        // This must happen before legacy dashboard rendering so one old UI error
-        // cannot hide the live V10 data.
-        if (window.renderV10AllData) {
-            try { window.renderV10AllData(data); } catch (renderError) {
-                console.error("V10 RAW RENDER ERROR:", renderError);
-            }
-        }
-
         if (!data.ok) {
             throw new Error(
                 data.error || "SCALP API ERROR"
@@ -2432,31 +2374,28 @@ async function fetchLiveGold(){
         drawChart();
 
         // ==========================================
-        // UPDATE SCALP DASHBOARD
+        // RUN FULL DASHBOARD ENGINE
         // ==========================================
 
-        // The signal engine already runs on /api/scalp.
-        // Frontend only needs to render the returned result.
-        try {
-            updateScalpDashboard(data);
-        } catch (dashboardError) {
-            console.error("LEGACY DASHBOARD RENDER ERROR:", dashboardError);
-        }
+        // Refresh all existing H1/M15/M5 analysis,
+        // liquidity, market filter, confluence,
+        // entry quality and dynamic trade plan.
+        runEngine();
 
     } catch (e) {
 
         console.error(
-            "LIVE DASHBOARD ERROR:",
+            "fetchLiveGold ERROR:",
             e
         );
 
-        api.innerText = "● DATA RECEIVED / UI ERROR";
+        api.innerText = "● API ERROR";
         api.className =
             "api-status api-error";
 
         if (source) {
             source.innerText =
-                "Data API diterima, tetapi paparan dashboard gagal";
+                "API gagal — cuba lagi";
         }
 
         const chartLive =
@@ -2464,7 +2403,7 @@ async function fetchLiveGold(){
 
         if (chartLive) {
             chartLive.innerText =
-                "● ERROR";
+                "● OFFLINE";
         }
     } finally {
         liveFetchBusy=false;
@@ -4236,7 +4175,8 @@ total
 showSignalAlert(
 signal,
 total,
-currentPrice
+currentPrice,
+signalType
 );
 
 lastSignalTime=
@@ -4990,7 +4930,8 @@ SIGNAL ALERT
 async function showSignalAlert(
 signal,
 score,
-price
+price,
+signalType="FULL ALIGNMENT"
 ){
 
 const box=document.getElementById("signalAlert");
@@ -5016,15 +4957,15 @@ title.innerText=
 "🟢 NEW VALID BUY SIGNAL";
 
 detail.innerText=
-`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • H1 → M15 → M5 ALIGNED`;
+`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 master.classList.add(
 "signal-buy-active"
 );
 
-pushTitle="🟢 XAU/USD BUY";
+pushTitle=`🟢 XAU/USD BUY ${signalType}`;
 pushBody=
-`Price ${price.toFixed(2)} • Score ${score}/100`;
+`Price ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 playAlertSound("BUY");
 
@@ -5041,15 +4982,15 @@ title.innerText=
 "🔴 NEW VALID SELL SIGNAL";
 
 detail.innerText=
-`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • H1 → M15 → M5 ALIGNED`;
+`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 master.classList.add(
 "signal-sell-active"
 );
 
-pushTitle="🔴 XAU/USD SELL";
+pushTitle=`🔴 XAU/USD SELL ${signalType}`;
 pushBody=
-`Price ${price.toFixed(2)} • Score ${score}/100`;
+`Price ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 playAlertSound("SELL");
 
@@ -5080,7 +5021,11 @@ headers:{
 },
 body:JSON.stringify({
 title:pushTitle,
-body:pushBody
+body:pushBody,
+signal,
+signalType,
+price,
+score
 })
 }
 );
@@ -5694,7 +5639,5 @@ updateDiagnostic,
 
 })();
 </script>
-
-
 </body>
 </html>
