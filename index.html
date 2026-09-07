@@ -2216,105 +2216,161 @@ LIVE API
 
 async function fetchLiveGold(){
 
-const api=document.getElementById("apiStatus");
-const source=document.getElementById("priceSource");
+  const api = document.getElementById("apiStatus");
+  const source = document.getElementById("priceSource");
 
-try{
+  try {
 
-api.innerText="● API CONNECTING";
-api.className="api-status";
+    api.innerText = "● API CONNECTING";
+    api.className = "api-status";
 
-const response=
-await fetch(
-"/api/xau?ts="+Date.now(),
-{
-cache:"no-store"
-}
-);
+    const response = await fetch(
+      "/api/xau?ts=" + Date.now(),
+      {
+        cache: "no-store"
+      }
+    );
 
-if(!response.ok){
-throw new Error("HTTP "+response.status);
-}
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
 
-const data=await response.json();
+    const data = await response.json();
 
-if(!data.values?.length){
-throw new Error("Tiada candle");
-}
+    // =====================================================
+    // NEW V10 API FORMAT
+    // =====================================================
 
-const raw=data.values;
+    if (!data.ok) {
+      throw new Error(
+        data.error || "API response invalid"
+      );
+    }
 
-candles=
-raw
-.map(x=>({
+    if (!Array.isArray(data.candles) || !data.candles.length) {
+      throw new Error("Tiada candle");
+    }
 
-time:x.datetime||x.time,
-open:num(x.open),
-high:num(x.high),
-low:num(x.low),
-close:num(x.close),
-volume:num(x.volume)||0
+    // =====================================================
+    // CANDLES
+    // =====================================================
 
-}))
-.filter(x=>
-isFinite(x.open)&&
-isFinite(x.high)&&
-isFinite(x.low)&&
-isFinite(x.close)
-)
-.sort(
-(a,b)=>
-new Date(a.time)-new Date(b.time)
-);
+    candles = data.candles
+      .map(x => ({
+        time: x.datetime || x.time,
+        open: num(x.open),
+        high: num(x.high),
+        low: num(x.low),
+        close: num(x.close),
+        volume: num(x.volume) || 0
+      }))
+      .filter(x =>
+        x.time &&
+        isFinite(x.open) &&
+        isFinite(x.high) &&
+        isFinite(x.low) &&
+        isFinite(x.close)
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.time) - new Date(b.time)
+      );
 
-if(!candles.length){
-throw new Error("Candle invalid");
-}
+    if (!candles.length) {
+      throw new Error("Candle invalid");
+    }
 
-const latest=
-candles[candles.length-1];
+    // =====================================================
+    // LIVE PRICE
+    // =====================================================
 
-previousPrice=currentPrice;
-currentPrice=latest.close;
+    const livePrice =
+      Number(data.livePrice?.price) ||
+      Number(data.price) ||
+      candles[candles.length - 1].close;
 
-document.getElementById("livePrice").innerText=
-currentPrice.toFixed(2);
+    if (!isFinite(livePrice)) {
+      throw new Error("Live price invalid");
+    }
 
-document.getElementById("priceInput").value=
-currentPrice.toFixed(2);
+    const candlePrice =
+      candles[candles.length - 1].close;
 
-document.getElementById("riskEntry").value=
-currentPrice.toFixed(2);
+    previousPrice = currentPrice;
+    currentPrice = livePrice;
 
-document.getElementById("chartPrice").innerText=
-currentPrice.toFixed(2);
+    // =====================================================
+    // UPDATE PRICE UI
+    // =====================================================
 
-source.innerText=
-"Twelve Data • Live 5M Candle • "+
-formatUpdateTime();
+    document.getElementById("livePrice").innerText =
+      currentPrice.toFixed(2);
 
-api.innerText="● LIVE API";
-api.className="api-status";
+    document.getElementById("priceInput").value =
+      currentPrice.toFixed(2);
 
-document.getElementById("chartLive").innerText="● LIVE";
+    document.getElementById("riskEntry").value =
+      currentPrice.toFixed(2);
 
-drawChart();
-await runScalpEngine();
+    document.getElementById("chartPrice").innerText =
+      currentPrice.toFixed(2);
 
-}catch(e){
+    // =====================================================
+    // SOURCE
+    // =====================================================
 
-console.error(e);
+    const liveSource =
+      data.livePrice?.source ||
+      "TWELVE_DATA_PRICE";
 
-api.innerText="● API ERROR";
-api.className="api-status api-error";
+    const liveAge =
+      Number(data.livePrice?.ageSeconds ?? 0);
 
-source.innerText=
-"API gagal — cuba lagi dalam 30 saat";
+    source.innerText =
+      "Twelve Data • Live Price • " +
+      liveSource +
+      " • " +
+      liveAge +
+      "s • " +
+      formatUpdateTime();
 
-document.getElementById("chartLive").innerText=
-"● OFFLINE";
+    // =====================================================
+    // API STATUS
+    // =====================================================
 
-}
+    api.innerText = "● LIVE API";
+    api.className = "api-status";
+
+    document.getElementById("chartLive").innerText =
+      "● LIVE";
+
+    // =====================================================
+    // CHART
+    // =====================================================
+
+    drawChart();
+
+    // =====================================================
+    // SCALP ENGINE
+    // =====================================================
+
+    await runScalpEngine();
+
+  } catch (e) {
+
+    console.error("fetchLiveGold ERROR:", e);
+
+    api.innerText = "● API ERROR";
+    api.className =
+      "api-status api-error";
+
+    source.innerText =
+      "API gagal — " +
+      (e.message || "Unknown error");
+
+    document.getElementById("chartLive").innerText =
+      "● OFFLINE";
+  }
 
 }
 
