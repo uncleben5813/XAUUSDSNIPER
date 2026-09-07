@@ -1126,7 +1126,7 @@ SIGNAL CONFLUENCE
 </div>
 
 <div class="confluence-sub">
-Minimum 75% + M15/M5 scalp alignment
+Minimum 75% + H1/M15/M5 alignment
 </div>
 
 <div class="filter-row">
@@ -1384,6 +1384,10 @@ let lastSignalPrice=0;
 
 const SIGNAL_COOLDOWN=15*60*1000;
 const MIN_SCORE=75;
+
+const LIVE_REFRESH_MS=5000;
+let liveFetchBusy=false;
+let liveRefreshTimer=null;
 
 
 /* =========================================================
@@ -2216,6 +2220,9 @@ LIVE API
 
 async function fetchLiveGold(){
 
+    if(liveFetchBusy) return;
+    liveFetchBusy=true;
+
     const api = document.getElementById("apiStatus");
     const source = document.getElementById("priceSource");
 
@@ -2367,10 +2374,13 @@ async function fetchLiveGold(){
         drawChart();
 
         // ==========================================
-        // RUN SCALP ENGINE
+        // RUN FULL DASHBOARD ENGINE
         // ==========================================
 
-        await runScalpEngine(data);
+        // Refresh all existing H1/M15/M5 analysis,
+        // liquidity, market filter, confluence,
+        // entry quality and dynamic trade plan.
+        runEngine();
 
     } catch (e) {
 
@@ -2395,9 +2405,18 @@ async function fetchLiveGold(){
             chartLive.innerText =
                 "● OFFLINE";
         }
+    } finally {
+        liveFetchBusy=false;
     }
 }
 
+function scheduleLiveRefresh(){
+    if(liveRefreshTimer) clearTimeout(liveRefreshTimer);
+    liveRefreshTimer=setTimeout(async()=>{
+        await fetchLiveGold();
+        scheduleLiveRefresh();
+    },LIVE_REFRESH_MS);
+}
 
 
 /* =========================================================
@@ -3989,6 +4008,8 @@ CONFLICT
 
 let conflicting=
 
+(h1Buy&&m15Sell)||
+(h1Sell&&m15Buy)||
 (m15Buy&&m5Sell)||
 (m15Sell&&m5Buy);
 
@@ -4058,12 +4079,12 @@ if (buyValid && !sellValid) {
 } else if (scalpBuyValid && !scalpSellValid) {
 
     signal = "BUY";
-    signalType = h1Sell ? "SCALP — SHORT TERM" : "SCALP";
+    signalType = "SCALP";
 
 } else if (scalpSellValid && !scalpBuyValid) {
 
     signal = "SELL";
-    signalType = h1Buy ? "SCALP — SHORT TERM" : "SCALP";
+    signalType = "SCALP";
 }
 
 
@@ -4154,7 +4175,8 @@ total
 showSignalAlert(
 signal,
 total,
-currentPrice
+currentPrice,
+signalType
 );
 
 lastSignalTime=
@@ -4908,7 +4930,8 @@ SIGNAL ALERT
 async function showSignalAlert(
 signal,
 score,
-price
+price,
+signalType="FULL ALIGNMENT"
 ){
 
 const box=document.getElementById("signalAlert");
@@ -4934,15 +4957,15 @@ title.innerText=
 "🟢 NEW VALID BUY SIGNAL";
 
 detail.innerText=
-`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • H1 → M15 → M5 ALIGNED`;
+`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 master.classList.add(
 "signal-buy-active"
 );
 
-pushTitle="🟢 XAU/USD BUY";
+pushTitle=`🟢 XAU/USD BUY ${signalType}`;
 pushBody=
-`Price ${price.toFixed(2)} • Score ${score}/100`;
+`Price ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 playAlertSound("BUY");
 
@@ -4959,15 +4982,15 @@ title.innerText=
 "🔴 NEW VALID SELL SIGNAL";
 
 detail.innerText=
-`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • H1 → M15 → M5 ALIGNED`;
+`XAU/USD ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 master.classList.add(
 "signal-sell-active"
 );
 
-pushTitle="🔴 XAU/USD SELL";
+pushTitle=`🔴 XAU/USD SELL ${signalType}`;
 pushBody=
-`Price ${price.toFixed(2)} • Score ${score}/100`;
+`Price ${price.toFixed(2)} • Score ${score}/100 • ${signalType}`;
 
 playAlertSound("SELL");
 
@@ -4998,7 +5021,11 @@ headers:{
 },
 body:JSON.stringify({
 title:pushTitle,
-body:pushBody
+body:pushBody,
+signal,
+signalType,
+price,
+score
 })
 }
 );
@@ -5296,6 +5323,7 @@ renderHistory();
 updateRiskCalculator();
 updateNotificationStatus();
 fetchLiveGold();
+scheduleLiveRefresh();
 
 }
 );
@@ -5304,11 +5332,6 @@ fetchLiveGold();
 /* =========================================================
 INTERVALS
 ========================================================= */
-
-setInterval(
-fetchLiveGold,
-60000
-);
 
 setInterval(
 updateSessions,
