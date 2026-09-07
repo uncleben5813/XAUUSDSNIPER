@@ -2398,53 +2398,6 @@ async function fetchLiveGold(){
     }
 }
 
-    
-/* =========================================================
-SCALP ENGINE V3
-========================================================= */
-
-async function runScalpEngine(){
-
-    try{
-
-        const response = await fetch(
-            "/api/scalp?ts=" + Date.now(),
-            {
-                cache: "no-store"
-            }
-        );
-
-        if(!response.ok){
-            throw new Error(
-                "SCALP HTTP " + response.status
-            );
-        }
-
-        const data = await response.json();
-
-        if(!data.ok){
-            throw new Error(
-                data.error ||
-                "Scalp engine error"
-            );
-        }
-
-        console.log("SCALP LIVE:", data);
-
-        window.scalp = data;
-
-        updateScalpDashboard(data);
-
-    }catch(e){
-
-        console.error(
-            "Scalp Engine:",
-            e
-        );
-
-    }
-
-}
 
 
 /* =========================================================
@@ -2453,289 +2406,276 @@ SCALP DASHBOARD
 
 function updateScalpDashboard(data){
 
-    const status =
-        data.status || "WAIT";
+    const status = data.status || "WAIT";
+    const signal = data.signal || "WAIT";
 
-    const signal =
-        data.signal || "WAIT";
-
-    const type =
-        data.signalType || "NONE";
-
-    const score =
-        Number(data.score || 0);
-
-    const h1 =
-        data.h1 || {};
-
-    const m15 =
-        data.m15 || {};
-
-    const m5 =
-        data.m5 || {};
-
-    /* =====================================================
-       MASTER
-    ===================================================== */
-
-    const master =
-        document.getElementById("masterSignal");
-
-    if(master){
-
-        master.innerText =
-            signal === "WAIT"
-                ? "WAIT"
-                : `${status} ${signal}`;
-
-    }
-
-
-    /* =====================================================
-       MASTER SCORE
-    ===================================================== */
-
-    const scoreEl =
-        document.getElementById("entryScore");
-
-    if(scoreEl){
-
-        scoreEl.innerText =
-            score + "/100";
-
-    }
-
-
-    /* =====================================================
-       H1
-    ===================================================== */
+    const h1 = data.h1 || {};
+    const m15 = data.m15 || {};
+    const m5 = data.m5 || {};
 
     const h1Direction =
-        h1.direction || "WAIT";
-
-    setDashboardText(
-        [
-            "h1Direction",
-            "h1Bias",
-            "h1Trend",
-            "h1Status"
-        ],
-        formatDirection(h1Direction)
-    );
-
-
-    /* =====================================================
-       H1 EMA / FIGURE
-    ===================================================== */
-
-    setDashboardText(
-        ["h1EMA50"],
-        formatNumber(h1.ema50)
-    );
-
-    setDashboardText(
-        ["h1EMA200"],
-        formatNumber(h1.ema200)
-    );
-
-
-    /* =====================================================
-       M15
-    ===================================================== */
+        String(h1.direction || "WAIT").toUpperCase();
 
     const m15Direction =
-        m15.direction ||
-        m15.confirmation ||
+        String(
+            m15.confirmation ||
+            m15.direction ||
+            "WAIT"
+        ).toUpperCase();
+
+    const m5Direction =
+        String(
+            m5.trigger ||
+            m5.confirmation ||
+            "WAIT"
+        ).toUpperCase();
+
+
+    /* ==============================
+       H1
+    ============================== */
+
+    const h1Bull =
+        h1Direction === "BUY";
+
+    const h1Bear =
+        h1Direction === "SELL";
+
+    const h1Text =
+        h1Bull ? "BULLISH" :
+        h1Bear ? "BEARISH" :
         "WAIT";
 
-    const m15Confirmation =
-        m15.confirmation ||
+
+    /* ==============================
+       M15
+    ============================== */
+
+    const m15Bull =
+        m15Direction === "BUY";
+
+    const m15Bear =
+        m15Direction === "SELL";
+
+    const m15Text =
+        m15Bull ? "BULLISH" :
+        m15Bear ? "BEARISH" :
         "WAIT";
 
-    setDashboardText(
-        [
-            "m15Direction",
-            "m15Bias",
-            "m15Trend"
-        ],
-        formatDirection(m15Direction)
-    );
 
-    setDashboardText(
-        [
-            "m15Confirmation",
-            "m15Confirm"
-        ],
-        formatDirection(m15Confirmation)
-    );
-
-
-    /* =====================================================
-       M15 SCORE
-    ===================================================== */
-
-    setDashboardText(
-        ["m15BuyScore"],
-        Number(m15.buyScore || 0) + "/100"
-    );
-
-    setDashboardText(
-        ["m15SellScore"],
-        Number(m15.sellScore || 0) + "/100"
-    );
-
-
-    /* =====================================================
+    /* ==============================
        M5
-    ===================================================== */
+    ============================== */
 
-    const m5Trigger =
-        m5.trigger ||
-        m5.confirmation ||
+    const m5Bull =
+        m5Direction === "BUY";
+
+    const m5Bear =
+        m5Direction === "SELL";
+
+    const m5Text =
+        m5Bull ? "BULLISH" :
+        m5Bear ? "BEARISH" :
         "WAIT";
 
-    setDashboardText(
-        [
-            "m5Trigger",
-            "m5TriggerStatus",
-            "m5Direction",
-            "m5Bias"
-        ],
-        formatDirection(m5Trigger)
+
+    /* ==============================
+       H1 TREND
+    ============================== */
+
+    setFilter(
+        "dotTrend",
+        "filterTrend",
+        h1Bull || h1Bear
     );
 
+    const filterTrend =
+        document.getElementById("filterTrend");
 
-    /* =====================================================
-       M5 SCORE
-    ===================================================== */
-
-    setDashboardText(
-        ["m5BuyScore"],
-        Number(m5.buyScore || 0) + "/100"
-    );
-
-    setDashboardText(
-        ["m5SellScore"],
-        Number(m5.sellScore || 0) + "/100"
-    );
-
-
-    /* =====================================================
-       M5 ACTUAL TRIGGER
-    ===================================================== */
-
-    const actualBuy =
-        !!m5.buyTriggered;
-
-    const actualSell =
-        !!m5.sellTriggered;
-
-    let actualTrigger = "WAIT";
-
-    if(actualBuy){
-        actualTrigger = "BUY";
-    }else if(actualSell){
-        actualTrigger = "SELL";
+    if(filterTrend){
+        filterTrend.innerText =
+            h1Text;
     }
 
-    setDashboardText(
-        [
-            "actualTrigger",
-            "m5ActualTrigger"
-        ],
-        formatDirection(actualTrigger)
+
+    /* ==============================
+       M15 CONFIRMATION
+    ============================== */
+
+    setFilter(
+        "dotMomentum",
+        "filterMomentum",
+        m15Bull || m15Bear
     );
 
+    const filterMomentum =
+        document.getElementById("filterMomentum");
 
-    /* =====================================================
-       CONFIRMATION FLAGS
-    ===================================================== */
-
-    let confirmation =
-        "WAIT";
-
-    if(m15.sellConfirmed){
-        confirmation = "SELL";
-    }else if(m15.buyConfirmed){
-        confirmation = "BUY";
+    if(filterMomentum){
+        filterMomentum.innerText =
+            m15Text;
     }
 
-    setDashboardText(
-        [
-            "confirmation",
-            "confirmStatus"
-        ],
-        formatDirection(confirmation)
+
+    /* ==============================
+       M5 TRIGGER
+    ============================== */
+
+    setFilter(
+        "dotTrigger",
+        "filterTrigger",
+        m5Bull || m5Bear
     );
 
+    const filterTrigger =
+        document.getElementById("filterTrigger");
 
-    /* =====================================================
-       STATUS / TYPE
-    ===================================================== */
-
-    setDashboardText(
-        ["scalpStatus"],
-        `${status} ${signal}`
-    );
-
-    setDashboardText(
-        ["scalpType"],
-        type
-    );
+    if(filterTrigger){
+        filterTrigger.innerText =
+            m5Text;
+    }
 
 
-    /* =====================================================
-       H1 CONTEXT
-    ===================================================== */
+    /* ==============================
+       SCORES
+    ============================== */
 
-    setDashboardText(
-        ["h1Context"],
-        h1.context || data.context || "NEUTRAL"
-    );
+    const scoreH1 =
+        document.getElementById("scoreH1");
+
+    if(scoreH1){
+
+        scoreH1.innerText =
+            (
+                h1Bull || h1Bear
+                    ? "20/20"
+                    : "0/20"
+            );
+    }
 
 
-    /* =====================================================
-       TRADE PLAN
-    ===================================================== */
+    const scoreM15 =
+        document.getElementById("scoreM15");
 
-    const plan =
-        data.tradePlan || {};
+    if(scoreM15){
 
-    setDashboardText(
-        ["tradeEntry"],
-        formatNumber(plan.entry)
-    );
+        const s =
+            Math.max(
+                Number(m15.buyScore || 0),
+                Number(m15.sellScore || 0)
+            );
 
-    setDashboardText(
-        ["tradeSL", "stopLoss"],
-        formatNumber(plan.stopLoss)
-    );
+        scoreM15.innerText =
+            Math.min(
+                20,
+                Math.round(s / 5)
+            ) + "/20";
+    }
 
-    setDashboardText(
-        ["tradeTP1", "tp1"],
-        formatNumber(plan.tp1)
-    );
 
-    setDashboardText(
-        ["tradeTP2", "tp2"],
-        formatNumber(plan.tp2)
-    );
+    const scoreM5 =
+        document.getElementById("scoreM5");
+
+    if(scoreM5){
+
+        const s =
+            Math.max(
+                Number(m5.buyScore || 0),
+                Number(m5.sellScore || 0)
+            );
+
+        scoreM5.innerText =
+            Math.min(
+                20,
+                Math.round(s / 5)
+            ) + "/20";
+    }
+
+
+    /* ==============================
+       MASTER SIGNAL
+    ============================== */
+
+    const badge =
+        document.getElementById(
+            "masterSignalBadge"
+        );
+
+    if(badge){
+
+        badge.className =
+            "signal-badge";
+
+        if(signal === "BUY"){
+
+            badge.classList.add(
+                "sig-buy"
+            );
+
+            badge.innerText =
+                "🟢 " +
+                status +
+                " BUY";
+
+        }else if(signal === "SELL"){
+
+            badge.classList.add(
+                "sig-sell"
+            );
+
+            badge.innerText =
+                "🔴 " +
+                status +
+                " SELL";
+
+        }else{
+
+            badge.classList.add(
+                "sig-wait"
+            );
+
+            badge.innerText =
+                "⏳ WAIT";
+        }
+    }
+
+
+    /* ==============================
+       TOP SIGNAL
+    ============================== */
+
+    const topSignal =
+        document.getElementById(
+            "topSignalStatus"
+        );
+
+    if(topSignal){
+
+        topSignal.innerText =
+            signal;
+
+        topSignal.className =
+            "status-value " +
+            (
+                signal === "BUY"
+                    ? "pass"
+                    : signal === "SELL"
+                    ? "fail"
+                    : "neutral"
+            );
+    }
 
 
     console.log(
-        "Dashboard updated:",
+        "SCALP DASHBOARD UPDATED",
         {
-            H1: h1Direction,
-            M15: m15Direction,
-            M15Confirmation: m15Confirmation,
-            M5: m5Trigger,
-            M5ActualTrigger: actualTrigger,
-            signal,
+            H1: h1Text,
+            M15: m15Text,
+            M5: m5Text,
             status,
-            score
+            signal
         }
     );
-
 }
 
 
