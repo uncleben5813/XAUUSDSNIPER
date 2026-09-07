@@ -113,129 +113,19 @@ export default async function handler(req, res) {
     }
 
     // =====================================================
-    // LIVE PRICE CACHE
-    // =====================================================
+// LIVE PRICE
+// =====================================================
 
-    globalThis.__XAU_LIVE_PRICE_CACHE__ ??= {
-      price: null,
-      fetchedAt: 0
-    };
+// Use latest M5 candle as price.
+// This avoids a separate Twelve Data /price API request
+// and keeps usage to ONE time_series request per cache refresh.
 
-    const livePriceCache =
-      globalThis.__XAU_LIVE_PRICE_CACHE__;
+const candlePrice =
+  candles.at(-1)?.close ?? null;
 
-    const candlePrice =
-      candles.at(-1)?.close ?? null;
-
-    let livePrice = candlePrice;
-    let livePriceSource = "M5_CANDLE";
-    let livePriceError = null;
-
-    if (
-      livePriceCache.price !== null &&
-      Date.now() - livePriceCache.fetchedAt <
-        CFG.livePriceTTL
-    ) {
-
-      livePrice =
-        livePriceCache.price;
-
-      livePriceSource =
-        "TWELVE_DATA_PRICE_CACHE";
-
-    } else {
-
-      try {
-
-        const priceUrl =
-          `https://api.twelvedata.com/price` +
-          `?symbol=${encodeURIComponent(CFG.symbol)}` +
-          `&apikey=${API_KEY}`;
-
-        const priceResponse =
-          await fetch(priceUrl);
-
-        const priceData =
-          await priceResponse.json();
-
-        const parsedPrice =
-          Number(priceData?.price);
-
-        if (
-          priceResponse.ok &&
-          priceData?.status !== "error" &&
-          Number.isFinite(parsedPrice)
-        ) {
-
-          livePrice =
-            parsedPrice;
-
-          livePriceSource =
-            "TWELVE_DATA_PRICE";
-
-          livePriceCache.price =
-            parsedPrice;
-
-          livePriceCache.fetchedAt =
-            Date.now();
-
-        } else {
-
-          livePriceError =
-            priceData?.message ||
-            "Live price API error";
-
-          if (
-            livePriceCache.price !== null
-          ) {
-
-            livePrice =
-              livePriceCache.price;
-
-            livePriceSource =
-              "TWELVE_DATA_PRICE_CACHE";
-
-          } else {
-
-            livePrice =
-              candlePrice;
-
-            livePriceSource =
-              "M5_CANDLE_FALLBACK";
-          }
-        }
-
-      } catch (error) {
-
-        console.error(
-          "LIVE PRICE ERROR:",
-          error
-        );
-
-        livePriceError =
-          error?.message ||
-          "Live price request failed";
-
-        if (
-          livePriceCache.price !== null
-        ) {
-
-          livePrice =
-            livePriceCache.price;
-
-          livePriceSource =
-            "TWELVE_DATA_PRICE_CACHE";
-
-        } else {
-
-          livePrice =
-            candlePrice;
-
-          livePriceSource =
-            "M5_CANDLE_FALLBACK";
-        }
-      }
-    }
+const livePrice = candlePrice;
+const livePriceSource = "M5_CANDLE";
+const livePriceError = null;
 
     // =====================================================
     // SIGNAL PRICE
