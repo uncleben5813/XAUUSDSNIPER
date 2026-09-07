@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="/manifest.json">
+<title>XAU/USD PRO SNIPER — V10 LIVE</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--sub:#f7f9fc;--text:#20252b;--muted:#737b87;--border:#e1e5ea;--blue:#2563eb;--green:#15803d;--greenbg:#dcfce7;--red:#dc2626;--redbg:#fee2e2;--yellow:#a16207;--yellowbg:#fef3c7;--purple:#7c3aed;--purplebg:#f3e8ff;--dark:#0f172a}
+*{box-sizing:border-box}body{margin:0;padding:8px;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}.wrap{max-width:1150px;margin:auto}
+header{text-align:center;margin:5px 0 10px}h1{margin:0;color:#a87900;font-size:1.35rem}header p{margin:4px 0;color:var(--muted);font-size:.7rem}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px}.card,.status,.master,.chart,.plan,.raw{background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 3px 14px rgba(0,0,0,.05);padding:10px}.full{grid-column:1/-1}
+.statusgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}.status{text-align:center;padding:8px 4px}.lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase}.val{font-size:.78rem;font-weight:800;margin-top:3px}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--yellow)}
+.master{text-align:center;margin-bottom:8px;border:2px solid var(--border)}.price{font-size:2rem;font-weight:900;color:#a87900}.source{font-size:.58rem;color:var(--muted)}.badge{display:inline-block;padding:7px 28px;border-radius:8px;margin:7px 0 4px;font-size:1.2rem;font-weight:900}.buy{color:var(--green);background:var(--greenbg);border-color:#22c55e}.sell{color:var(--red);background:var(--redbg);border-color:#ef4444}.wait{color:var(--purple);background:var(--purplebg);border-color:#a78bfa}.score{font-size:.78rem;color:var(--muted)}.bar{height:8px;background:#e5e7eb;border-radius:20px;overflow:hidden;margin:6px 0}.fill{height:100%;width:0;background:var(--green);transition:.3s}
+.stages{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.stage{background:var(--sub);border:1px solid var(--border);border-radius:6px;padding:6px;font-size:.6rem}.stage b{display:block;font-size:.75rem;margin-top:2px}
+h2{font-size:.82rem;color:var(--blue);margin:0 0 7px;padding-bottom:6px;border-bottom:2px solid var(--border);display:flex;justify-content:space-between}.tag{font-size:.55rem;padding:3px 6px;border-radius:5px;background:var(--sub);color:var(--muted)}
+.metric{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid #f0f2f5;font-size:.7rem}.metric:last-child{border-bottom:0}.metric strong{text-align:right;word-break:break-word}
+.reason{font-size:.68rem;padding:3px 0}.good{color:var(--green)}.badtxt{color:var(--red)}.neutral{color:var(--yellow)}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.planitem{background:var(--sub);border:1px solid var(--border);border-radius:6px;padding:7px;font-size:.62rem}.planitem b{display:block;font-size:.82rem;margin-top:3px}
+.chartbox{height:280px;background:#0f172a;border-radius:8px;position:relative;overflow:hidden}.chartbox canvas{width:100%;height:100%}.chartprice{position:absolute;right:7px;top:7px;background:#fff;padding:4px 7px;border-radius:5px;font-size:.7rem;font-weight:800;color:#a87900}
+.tablewrap{overflow:auto;max-height:300px}.candles{width:100%;border-collapse:collapse;font-size:.58rem}.candles th,.candles td{padding:4px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:right}.candles th{position:sticky;top:0;background:var(--sub)}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:.58rem;max-height:500px;overflow:auto;background:#0f172a;color:#dbeafe;padding:9px;border-radius:7px}
+button{border:0;border-radius:6px;background:var(--blue);color:#fff;padding:7px 10px;font-weight:800;font-size:.65rem}button:active{transform:scale(.98)}
+.actions{display:flex;gap:6px;justify-content:center;margin:8px 0}.footer{text-align:center;color:var(--muted);font-size:.58rem;padding:10px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.statusgrid{grid-template-columns:repeat(2,1fr)}.plan-grid{grid-template-columns:repeat(2,1fr)}.chartbox{height:220px}.price{font-size:1.7rem}.full{grid-column:auto}}
+.mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.mini{background:var(--sub);border:1px solid var(--border);border-radius:6px;padding:6px;font-size:.62rem}.mini b{display:block;font-size:.76rem;margin-top:2px}.stale{color:var(--red)!important}.fresh{color:var(--green)!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>XAU/USD PRO SNIPER V10</h1><p>M15 + M5 ALIGNED SIGNAL • H1 BIAS / HOLD • API DATA ONLY</p></header>
+
+<div class="statusgrid">
+  <div class="status"><div class="lbl">API</div><div id="apiStatus" class="val warn">CONNECTING</div></div>
+  <div class="status"><div class="lbl">Signal</div><div id="topSignal" class="val warn">WAIT</div></div>
+  <div class="status"><div class="lbl">Execution</div><div id="executionStatus" class="val">--</div></div>
+  <div class="status"><div class="lbl">MYT</div><div id="clock" class="val">--:--:--</div></div>
+</div>
+
+<div class="chart card">
+  <h2><span>XAU/USD • LIVE 5M</span><span id="chartStatus" class="tag">--</span></h2>
+  <div class="chartbox"><canvas id="chart"></canvas><div id="chartPrice" class="chartprice">--</div></div>
+</div>
+
+<div class="master">
+  <div class="lbl">LIVE MARKET PRICE</div>
+  <div id="livePrice" class="price">--</div>
+  <div id="priceSource" class="source">--</div>
+  <div id="signalBadge" class="badge wait">WAIT</div>
+  <div class="score">Score: <b id="score">0</b>/100 • <span id="signalType">--</span> • <span id="setupType">--</span> • <span id="context">--</span></div>
+  <div class="bar"><div id="scoreFill" class="fill"></div></div>
+  <div class="stages">
+    <div class="stage">H1 BIAS<b id="stageH1">--</b></div>
+    <div class="stage">M15 CONFIRM<b id="stageM15">--</b></div>
+    <div class="stage">M5 TRIGGER<b id="stageM5">--</b></div>
+  </div>
+</div>
+
+<div class="card full">
+<h2><span>🎯 TRADE PLAN</span><span id="planStatus" class="tag">--</span></h2>
+<div class="plan-grid">
+<div class="planitem">ENTRY<b id="entry">--</b></div><div class="planitem">DIRECTION<b id="direction">--</b></div>
+<div class="planitem">STOP LOSS<b id="sl">--</b></div><div class="planitem">TP1<b id="tp1">--</b></div>
+<div class="planitem">TP2<b id="tp2">--</b></div><div class="planitem">RR<b id="rr">--</b></div>
+</div></div>
+
+<div class="grid">
+<section class="card">
+<h2><span>H1 — BIG DIRECTION</span><span id="h1Tag" class="tag">--</span></h2>
+<div class="metric"><span>Direction</span><strong id="h1Direction">--</strong></div>
+<div class="metric"><span>Context</span><strong id="h1Context">--</strong></div>
+<div class="metric"><span>EMA 50</span><strong id="h1Ema50">--</strong></div>
+<div class="metric"><span>EMA 200</span><strong id="h1Ema200">--</strong></div>
+</section>
+
+<section class="card">
+<h2><span>M15 — CONFIRMATION</span><span id="m15Tag" class="tag">--</span></h2>
+<div class="metric"><span>Direction</span><strong id="m15Direction">--</strong></div>
+<div class="metric"><span>Confirmation</span><strong id="m15Confirmation">--</strong></div>
+<div class="metric"><span>Reversal</span><strong id="m15Reversal">--</strong></div>
+<div class="metric"><span>Buy / Sell Score</span><strong id="m15Scores">--</strong></div>
+<div class="metric"><span>EMA 20 / 50</span><strong id="m15Ema">--</strong></div>
+<div class="metric"><span>RSI</span><strong id="m15Rsi">--</strong></div>
+<div class="metric"><span>MACD</span><strong id="m15Macd">--</strong></div>
+<div class="metric"><span>ATR</span><strong id="m15Atr">--</strong></div>
+<div class="metric"><span>BOS / CHOCH</span><strong id="m15Bos">--</strong></div>
+<div class="metric"><span>Sweep</span><strong id="m15Sweep">--</strong></div>
+<div class="metric"><span>Manipulation</span><strong id="m15Manip">--</strong></div>
+<div class="metric"><span>Momentum</span><strong id="m15Momentum">--</strong></div>
+<div class="metric"><span>Structure</span><strong id="m15Structure">--</strong></div>
+</section>
+
+<section class="card">
+<h2><span>M5 — ACTUAL TRIGGER</span><span id="m5Tag" class="tag">--</span></h2>
+<div class="metric"><span>Trigger</span><strong id="m5Trigger">--</strong></div>
+<div class="metric"><span>Confirmation</span><strong id="m5Confirmation">--</strong></div>
+<div class="metric"><span>Buy / Sell Score</span><strong id="m5Scores">--</strong></div>
+<div class="metric"><span>EMA 9 / 20 / 50</span><strong id="m5Ema">--</strong></div>
+<div class="metric"><span>RSI</span><strong id="m5Rsi">--</strong></div>
+<div class="metric"><span>MACD</span><strong id="m5Macd">--</strong></div>
+<div class="metric"><span>ATR</span><strong id="m5Atr">--</strong></div>
+<div class="metric"><span>BOS / CHOCH</span><strong id="m5Bos">--</strong></div>
+<div class="metric"><span>Sweep</span><strong id="m5Sweep">--</strong></div>
+<div class="metric"><span>Manipulation</span><strong id="m5Manip">--</strong></div>
+<div class="metric"><span>Momentum</span><strong id="m5Momentum">--</strong></div>
+<div class="metric"><span>Structure</span><strong id="m5Structure">--</strong></div>
+</section>
+
+<section class="card">
+<h2><span>WHY THIS SIGNAL?</span><span class="tag">API REASONS</span></h2>
+<div id="reasons">--</div>
+</section>
+
+<section class="card">
+<h2><span>DATA / CACHE</span><span class="tag">V10</span></h2>
+<div class="metric"><span>API Version</span><strong id="version">--</strong></div>
+<div class="metric"><span>Symbol</span><strong id="symbol">--</strong></div>
+<div class="metric"><span>Cache Age</span><strong id="cacheAge">--</strong></div>
+<div class="metric"><span>Cache TTL</span><strong id="cacheTtl">--</strong></div>
+<div class="metric"><span>Live Price Age</span><strong id="priceAge">--</strong></div>
+<div class="metric"><span>M5 / M15 / H1 Candles</span><strong id="counts">--</strong></div>
+<div class="metric"><span>Timestamp</span><strong id="timestamp">--</strong></div>
+</section>
+</div>
+
+<div class="card">
+<h2><span>LAST 60 M5 CANDLES</span><span id="candleCount" class="tag">0</span></h2>
+<div class="tablewrap"><table class="candles"><thead><tr><th>Time</th><th>Open</th><th>High</th><th>Low</th><th>Close</th></tr></thead><tbody id="candleBody"></tbody></table></div>
+</div>
+
+<div class="card full">
+<h2><span>FULL API RESPONSE</span><span class="tag">RAW V10</span></h2>
+<div class="actions"><button onclick="toggleRaw()">SHOW / HIDE</button><button onclick="loadData()">REFRESH NOW</button></div>
+<pre id="raw" style="display:none">Waiting...</pre>
+</div>
+
+<div class="footer">XAU/USD PRO SNIPER V10 • Frontend reads /api/scalp only • No frontend signal recalculation</div>
+</div>
+
+<script>
+let lastData=null;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>v===null||v===undefined||v===''?'--':(typeof v==='number'?v.toFixed(d):String(v));
+const yn=v=>v?'YES':'NO';
+const sideClass=s=>String(s||'').toUpperCase()==='BUY'?'buy':String(s||'').toUpperCase()==='SELL'?'sell':'wait';
+
+function set(id,v){if($(id))$(id).textContent=v??'--'}
+function metricSignal(v){return String(v??'--').toUpperCase()}
+function renderReasons(d){
+  const r=d.reasons||[], box=$('reasons');
+  box.innerHTML=r.length?r.map(x=>'<div class="reason '+(String(x).toLowerCase().includes('bear')||String(x).toLowerCase().includes('sell')?'badtxt':'good')+'">• '+escapeHtml(x)+'</div>').join(''):'<div class="reason neutral">• No reason returned</div>';
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function renderTF(p,prefix){
+ if(!p)return;
+ if(prefix==='m15'){
+  set('m15Direction',metricSignal(p.direction));set('m15Confirmation',metricSignal(p.confirmation));set('m15Reversal',metricSignal(p.reversal));
+  set('m15Scores',fmt(p.buyScore,0)+' / '+fmt(p.sellScore,0));
+  set('m15Ema',fmt(p.ema20)+' / '+fmt(p.ema50));set('m15Rsi',fmt(p.rsi));set('m15Macd',fmt(p.macd?.line)+' / '+fmt(p.macd?.signal)+' / '+fmt(p.macd?.histogram)+' '+(p.macd?.bullish?'BULL':'')+(p.macd?.bearish?'BEAR':''));
+  set('m15Atr',fmt(p.atr));set('m15Bos',(p.bos?.bullish?'BULL ':'')+(p.bos?.bearish?'BEAR ':'')||'NONE');
+  set('m15Sweep',(p.sweep?.bullish?'BULL ':'')+(p.sweep?.bearish?'BEAR ':'')||'NONE');
+  set('m15Manip',(p.manipulation?.bullish?'BULL ':'')+(p.manipulation?.bearish?'BEAR ':'')||'NONE');
+  set('m15Momentum',p.momentum?((p.momentum.bullish?'BULL ':p.momentum.bearish?'BEAR ':'NONE')+' '+fmt(p.momentum.strength,0)):'--');
+  set('m15Structure',p.structure?((p.structure.bullish?'BULL ':p.structure.bearish?'BEAR ':'NONE')+' H:'+fmt(p.structure.high)+' L:'+fmt(p.structure.low)):'--');
+  $('m15Tag').textContent=metricSignal(p.direction)+' • '+metricSignal(p.confirmation);
+ }else{
+  set('m5Trigger',metricSignal(p.trigger));set('m5Confirmation',metricSignal(p.confirmation));set('m5Scores',fmt(p.buyScore,0)+' / '+fmt(p.sellScore,0));
+  set('m5Ema',fmt(p.ema9)+' / '+fmt(p.ema20)+' / '+fmt(p.ema50));set('m5Rsi',fmt(p.rsi));set('m5Macd',fmt(p.macd?.line)+' / '+fmt(p.macd?.signal)+' / '+fmt(p.macd?.histogram)+' '+(p.macd?.bullish?'BULL':'')+(p.macd?.bearish?'BEAR':''));
+  set('m5Atr',fmt(p.atr));set('m5Bos',(p.bos?.bullish?'BULL ':'')+(p.bos?.bearish?'BEAR ':'')||'NONE');
+  set('m5Sweep',(p.sweep?.bullish?'BULL ':'')+(p.sweep?.bearish?'BEAR ':'')||'NONE');
+  set('m5Manip',(p.manipulation?.bullish?'BULL ':'')+(p.manipulation?.bearish?'BEAR ':'')||'NONE');
+  set('m5Momentum',p.momentum?((p.momentum.bullish?'BULL ':p.momentum.bearish?'BEAR ':'NONE')+' '+fmt(p.momentum.strength,0)):'--');
+  set('m5Structure',p.structure?((p.structure.bullish?'BULL ':p.structure.bearish?'BEAR ':'NONE')+' H:'+fmt(p.structure.high)+' L:'+fmt(p.structure.low)):'--');
+  $('m5Tag').textContent=metricSignal(p.trigger)+' • '+metricSignal(p.confirmation);
+ }
+}
+function renderCandles(c){
+ const body=$('candleBody');body.innerHTML='';
+ (c||[]).slice(-60).reverse().forEach(x=>{
+  const tr=document.createElement('tr');
+  [x.datetime||x.time||x.dateTime||'--',fmt(+x.open),fmt(+x.high),fmt(+x.low),fmt(+x.close)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  body.appendChild(tr)
+ });set('candleCount',(c||[]).length+' shown');
+ drawChart((c||[]).slice(-60));
+}
+function drawChart(c){
+ const cv=$('chart'),ctx=cv.getContext('2d'),dpr=devicePixelRatio||1,w=cv.clientWidth||600,h=cv.clientHeight||280;
+ cv.width=w*dpr;cv.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ if(!c.length)return;
+ const vals=c.map(x=>+x.close).filter(Number.isFinite);if(!vals.length)return;
+ const min=Math.min(...vals),max=Math.max(...vals),pad=(max-min||1)*.08;
+ ctx.strokeStyle='#334155';ctx.lineWidth=1;
+ for(let i=1;i<5;i++){let y=i*h/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.beginPath();
+ vals.forEach((v,i)=>{const x=i*(w-10)/(vals.length-1)+5,y=h-8-((v-(min-pad))/(max-min+2*pad))*(h-16);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+}
+
+function renderScoreBreakdown(d){
+  const box=$('scoreBreakdown');
+  const s=d.scoreBreakdown||[];
+  box.innerHTML=s.map(x=>'<div class="metric"><span>'+escapeHtml(x.label)+'</span><strong>'+escapeHtml(String(x.value))+'</strong></div>').join('');
+}
+function signalAgreement(d){
+  const m15=String(d.m15?.confirmation||'WAIT').toUpperCase();
+  const m5=String(d.m5?.trigger||'WAIT').toUpperCase();
+  if(m15==='BUY'&&m5==='BUY') return 'BUY';
+  if(m15==='SELL'&&m5==='SELL') return 'SELL';
+  return 'WAIT';
+}
+
+function render(d){
+ lastData=d;set('livePrice',fmt(d.livePrice?.price??d.price,2));set('chartPrice',fmt(d.price,2));
+ set('priceSource',(d.livePrice?.source||'--')+' • age '+fmt(d.livePrice?.ageSeconds,0)+'s');
+ set('version',d.version);set('symbol',d.symbol);set('cacheAge',fmt(d.cache?.ageSeconds,0)+'s');set('cacheTtl',fmt(d.cache?.ttlSeconds,0)+'s');set('priceAge',fmt(d.livePrice?.ageSeconds,0)+'s');
+ set('counts',(d.data?.m5Candles??'--')+' / '+(d.data?.m15Candles??'--')+' / '+(d.data?.h1Candles??'--'));set('timestamp',d.timestamp?new Date(d.timestamp).toLocaleString('en-MY'):'--');
+ set('apiStatus',d.ok?'● LIVE':'● ERROR');$('apiStatus').className='val '+(d.ok?'ok':'bad');
+ const agreed=signalAgreement(d);set('topSignal',agreed);$('topSignal').className='val '+sideClass(agreed);
+ set('executionStatus',d.execution||'--');set('chartStatus','LIVE • '+(d.candles?.length||0)+' candles');
+ const agreed=signalAgreement(d);const badge=$('signalBadge');badge.className='badge '+sideClass(agreed);badge.textContent=(agreed==='BUY'?'🟢 BUY':agreed==='SELL'?'🔴 SELL':'⏳ WAIT');
+ set('score',fmt(d.score,0));$('scoreFill').style.width=Math.max(0,Math.min(100,+d.score||0))+'%';
+ set('signalType',d.signalType);set('setupType',d.setupType);set('context',d.context);set('agreement',agreed==='WAIT'?'NOT ALIGNED':'M15 + M5 '+agreed);set('setupValidity',d.setupStatus||'WAITING');set('signalAge',d.signalAgeSeconds!=null?fmt(d.signalAgeSeconds,0)+'s':'--');set('holdBias',d.h1?.holdBias||'NEUTRAL');renderScoreBreakdown(d);
+ set('stageH1',d.h1?.direction||'WAIT');set('stageM15',d.m15?.confirmation||d.m15?.direction||'WAIT');set('stageM5',d.m5?.trigger||'WAIT');
+ set('planStatus',d.execution||'--');const p=d.tradePlan||{};set('entry',fmt(p.entry));set('direction',d.signal||'--');set('sl',fmt(p.stopLoss));set('tp1',fmt(p.tp1));set('tp2',fmt(p.tp2));set('rr',p.rr==null?'--':fmt(p.rr));
+ const h=d.h1||{};set('h1Direction',h.direction);set('h1Context',h.context);set('h1Ema50',fmt(h.ema50));set('h1Ema200',fmt(h.ema200));set('h1Tag',h.direction||'--');set('h1HoldBias',h.holdBias||'NEUTRAL');set('h1Hold',h.holdPermission||'NO HOLD');set('h1Structure',h.structure?(h.structure.bullish?'BULLISH':h.structure.bearish?'BEARISH':'NEUTRAL'):'--');
+ renderTF(d.m15,'m15');renderTF(d.m5,'m5');renderReasons(d);renderCandles(d.candles||[]);
+ $('raw').textContent=JSON.stringify(d,null,2);
+}
+async function loadData(){
+ set('apiStatus','● LOADING');$('apiStatus').className='val warn';
+ try{
+  const r=await fetch('/api/scalp?ts='+Date.now(),{cache:'no-store'});
+  const d=await r.json();render(d);
+ }catch(e){
+  set('apiStatus','● FETCH ERROR');$('apiStatus').className='val bad';
+  $('raw').textContent='FETCH ERROR: '+e.message;
+ }
+}
+function toggleRaw(){const x=$('raw');x.style.display=x.style.display==='none'?'block':'none'}
+setInterval(()=>{set('clock',new Date().toLocaleTimeString('en-MY',{hour12:false}))},1000);
+setInterval(loadData,10000);
+window.addEventListener('resize',()=>lastData&&drawChart((lastData.candles||[]).slice(-60)));
+loadData();
+</script>
+</body>
+</html>
