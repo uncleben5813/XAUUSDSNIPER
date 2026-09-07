@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "@upstash/redis": "^1.35.3",
+    "web-push": "^3.6.7"
+  }
+}
