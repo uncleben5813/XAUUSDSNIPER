@@ -2420,8 +2420,7 @@ async function runScalpEngine(){
             );
         }
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if(!data.ok){
             throw new Error(
@@ -2430,21 +2429,9 @@ async function runScalpEngine(){
             );
         }
 
-        console.log(
-            "SCALP V3:",
-            data
-        );
-
-        /*
-         * Simpan untuk diagnostic/dashboard
-         */
+        console.log("SCALP LIVE:", data);
 
         window.scalp = data;
-
-        /*
-         * Kalau dashboard lama masih perlukan
-         * window.market, kita boleh sync kemudian.
-         */
 
         updateScalpDashboard(data);
 
@@ -2478,47 +2465,38 @@ function updateScalpDashboard(data){
     const score =
         Number(data.score || 0);
 
-    console.log(
-        `SCALP: ${status} ${signal} ${type} ${score}`
-    );
+    const h1 =
+        data.h1 || {};
 
-    /*
-     * Cari element Master Signal
-     */
+    const m15 =
+        data.m15 || {};
+
+    const m5 =
+        data.m5 || {};
+
+    /* =====================================================
+       MASTER
+    ===================================================== */
 
     const master =
-        document.getElementById(
-            "masterSignal"
-        );
+        document.getElementById("masterSignal");
 
     if(master){
 
-        let text =
-            "WAIT";
-
-        if(
-            status !== "WAIT" &&
-            signal !== "WAIT"
-        ){
-
-            text =
-                `${status} ${signal}`;
-
-        }
-
         master.innerText =
-            text;
+            signal === "WAIT"
+                ? "WAIT"
+                : `${status} ${signal}`;
 
     }
 
-    /*
-     * Score
-     */
+
+    /* =====================================================
+       MASTER SCORE
+    ===================================================== */
 
     const scoreEl =
-        document.getElementById(
-            "entryScore"
-        );
+        document.getElementById("entryScore");
 
     if(scoreEl){
 
@@ -2527,34 +2505,296 @@ function updateScalpDashboard(data){
 
     }
 
-    /*
-     * Diagnostic baru
-     */
 
-    const scalpStatus =
-        document.getElementById(
-            "scalpStatus"
-        );
+    /* =====================================================
+       H1
+    ===================================================== */
 
-    if(scalpStatus){
+    const h1Direction =
+        h1.direction || "WAIT";
 
-        scalpStatus.innerText =
-            `${status} ${signal}`;
+    setDashboardText(
+        [
+            "h1Direction",
+            "h1Bias",
+            "h1Trend",
+            "h1Status"
+        ],
+        formatDirection(h1Direction)
+    );
+
+
+    /* =====================================================
+       H1 EMA / FIGURE
+    ===================================================== */
+
+    setDashboardText(
+        ["h1EMA50"],
+        formatNumber(h1.ema50)
+    );
+
+    setDashboardText(
+        ["h1EMA200"],
+        formatNumber(h1.ema200)
+    );
+
+
+    /* =====================================================
+       M15
+    ===================================================== */
+
+    const m15Direction =
+        m15.direction ||
+        m15.confirmation ||
+        "WAIT";
+
+    const m15Confirmation =
+        m15.confirmation ||
+        "WAIT";
+
+    setDashboardText(
+        [
+            "m15Direction",
+            "m15Bias",
+            "m15Trend"
+        ],
+        formatDirection(m15Direction)
+    );
+
+    setDashboardText(
+        [
+            "m15Confirmation",
+            "m15Confirm"
+        ],
+        formatDirection(m15Confirmation)
+    );
+
+
+    /* =====================================================
+       M15 SCORE
+    ===================================================== */
+
+    setDashboardText(
+        ["m15BuyScore"],
+        Number(m15.buyScore || 0) + "/100"
+    );
+
+    setDashboardText(
+        ["m15SellScore"],
+        Number(m15.sellScore || 0) + "/100"
+    );
+
+
+    /* =====================================================
+       M5
+    ===================================================== */
+
+    const m5Trigger =
+        m5.trigger ||
+        m5.confirmation ||
+        "WAIT";
+
+    setDashboardText(
+        [
+            "m5Trigger",
+            "m5TriggerStatus",
+            "m5Direction",
+            "m5Bias"
+        ],
+        formatDirection(m5Trigger)
+    );
+
+
+    /* =====================================================
+       M5 SCORE
+    ===================================================== */
+
+    setDashboardText(
+        ["m5BuyScore"],
+        Number(m5.buyScore || 0) + "/100"
+    );
+
+    setDashboardText(
+        ["m5SellScore"],
+        Number(m5.sellScore || 0) + "/100"
+    );
+
+
+    /* =====================================================
+       M5 ACTUAL TRIGGER
+    ===================================================== */
+
+    const actualBuy =
+        !!m5.buyTriggered;
+
+    const actualSell =
+        !!m5.sellTriggered;
+
+    let actualTrigger = "WAIT";
+
+    if(actualBuy){
+        actualTrigger = "BUY";
+    }else if(actualSell){
+        actualTrigger = "SELL";
+    }
+
+    setDashboardText(
+        [
+            "actualTrigger",
+            "m5ActualTrigger"
+        ],
+        formatDirection(actualTrigger)
+    );
+
+
+    /* =====================================================
+       CONFIRMATION FLAGS
+    ===================================================== */
+
+    let confirmation =
+        "WAIT";
+
+    if(m15.sellConfirmed){
+        confirmation = "SELL";
+    }else if(m15.buyConfirmed){
+        confirmation = "BUY";
+    }
+
+    setDashboardText(
+        [
+            "confirmation",
+            "confirmStatus"
+        ],
+        formatDirection(confirmation)
+    );
+
+
+    /* =====================================================
+       STATUS / TYPE
+    ===================================================== */
+
+    setDashboardText(
+        ["scalpStatus"],
+        `${status} ${signal}`
+    );
+
+    setDashboardText(
+        ["scalpType"],
+        type
+    );
+
+
+    /* =====================================================
+       H1 CONTEXT
+    ===================================================== */
+
+    setDashboardText(
+        ["h1Context"],
+        h1.context || data.context || "NEUTRAL"
+    );
+
+
+    /* =====================================================
+       TRADE PLAN
+    ===================================================== */
+
+    const plan =
+        data.tradePlan || {};
+
+    setDashboardText(
+        ["tradeEntry"],
+        formatNumber(plan.entry)
+    );
+
+    setDashboardText(
+        ["tradeSL", "stopLoss"],
+        formatNumber(plan.stopLoss)
+    );
+
+    setDashboardText(
+        ["tradeTP1", "tp1"],
+        formatNumber(plan.tp1)
+    );
+
+    setDashboardText(
+        ["tradeTP2", "tp2"],
+        formatNumber(plan.tp2)
+    );
+
+
+    console.log(
+        "Dashboard updated:",
+        {
+            H1: h1Direction,
+            M15: m15Direction,
+            M15Confirmation: m15Confirmation,
+            M5: m5Trigger,
+            M5ActualTrigger: actualTrigger,
+            signal,
+            status,
+            score
+        }
+    );
+
+}
+
+
+/* =========================================================
+HELPERS
+========================================================= */
+
+function setDashboardText(ids, value){
+
+    for(const id of ids){
+
+        const el =
+            document.getElementById(id);
+
+        if(el){
+
+            el.innerText =
+                value;
+
+            return;
+
+        }
 
     }
 
-    const scalpType =
-        document.getElementById(
-            "scalpType"
-        );
+}
 
-    if(scalpType){
 
-        scalpType.innerText =
-            type;
+function formatDirection(value){
 
+    if(!value){
+        return "WAIT";
     }
 
+    const v =
+        String(value).toUpperCase();
+
+    if(v === "BUY" || v === "BULLISH"){
+        return "BULLISH";
+    }
+
+    if(v === "SELL" || v === "BEARISH"){
+        return "BEARISH";
+    }
+
+    return v;
+}
+
+
+function formatNumber(value){
+
+    const n =
+        Number(value);
+
+    if(!Number.isFinite(n)){
+        return "--";
+    }
+
+    return n.toFixed(2);
 }
 
     
