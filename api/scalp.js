@@ -113,19 +113,19 @@ export default async function handler(req, res) {
     }
 
     // =====================================================
-// LIVE PRICE
-// =====================================================
+    // LIVE PRICE
+    // =====================================================
 
-// Use latest M5 candle as price.
-// This avoids a separate Twelve Data /price API request
-// and keeps usage to ONE time_series request per cache refresh.
+    // Use latest M5 candle as price.
+    // This avoids a separate Twelve Data /price API request
+    // and keeps usage to ONE time_series request per cache refresh.
 
-const candlePrice =
-  candles.at(-1)?.close ?? null;
+    const candlePrice =
+      candles.at(-1)?.close ?? null;
 
-const livePrice = candlePrice;
-const livePriceSource = "M5_CANDLE";
-const livePriceError = null;
+    const livePrice = candlePrice;
+    const livePriceSource = "M5_CANDLE";
+    const livePriceError = null;
 
     // =====================================================
     // SIGNAL PRICE
