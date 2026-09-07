@@ -13,8 +13,11 @@ export default async function handler(req, res) {
       symbol: "XAU/USD",
       candles: 2500,
 
-      // 1 Twelve Data request / 60s
+      // M5 candle cache
       cacheTTL: 60 * 1000,
+
+      // Live price cache
+      livePriceTTL: 5 * 1000,
 
       // M15
       M15_CONFIRM_SCORE: 55,
@@ -32,7 +35,7 @@ export default async function handler(req, res) {
     };
 
     // =====================================================
-    // CACHE
+    // CACHE - M5 CANDLES
     // =====================================================
 
     globalThis.__XAU_SCALP_CACHE__ ??= {
@@ -108,6 +111,141 @@ export default async function handler(req, res) {
         cache.fetchedAt = now;
       }
     }
+
+    // =====================================================
+    // LIVE PRICE CACHE
+    // =====================================================
+
+    globalThis.__XAU_LIVE_PRICE_CACHE__ ??= {
+      price: null,
+      fetchedAt: 0
+    };
+
+    const livePriceCache =
+      globalThis.__XAU_LIVE_PRICE_CACHE__;
+
+    const candlePrice =
+      candles.at(-1)?.close ?? null;
+
+    let livePrice = candlePrice;
+    let livePriceSource = "M5_CANDLE";
+    let livePriceError = null;
+
+    if (
+      livePriceCache.price !== null &&
+      Date.now() - livePriceCache.fetchedAt <
+        CFG.livePriceTTL
+    ) {
+
+      livePrice =
+        livePriceCache.price;
+
+      livePriceSource =
+        "TWELVE_DATA_PRICE_CACHE";
+
+    } else {
+
+      try {
+
+        const priceUrl =
+          `https://api.twelvedata.com/price` +
+          `?symbol=${encodeURIComponent(CFG.symbol)}` +
+          `&apikey=${API_KEY}`;
+
+        const priceResponse =
+          await fetch(priceUrl);
+
+        const priceData =
+          await priceResponse.json();
+
+        const parsedPrice =
+          Number(priceData?.price);
+
+        if (
+          priceResponse.ok &&
+          priceData?.status !== "error" &&
+          Number.isFinite(parsedPrice)
+        ) {
+
+          livePrice =
+            parsedPrice;
+
+          livePriceSource =
+            "TWELVE_DATA_PRICE";
+
+          livePriceCache.price =
+            parsedPrice;
+
+          livePriceCache.fetchedAt =
+            Date.now();
+
+        } else {
+
+          livePriceError =
+            priceData?.message ||
+            "Live price API error";
+
+          if (
+            livePriceCache.price !== null
+          ) {
+
+            livePrice =
+              livePriceCache.price;
+
+            livePriceSource =
+              "TWELVE_DATA_PRICE_CACHE";
+
+          } else {
+
+            livePrice =
+              candlePrice;
+
+            livePriceSource =
+              "M5_CANDLE_FALLBACK";
+          }
+        }
+
+      } catch (error) {
+
+        console.error(
+          "LIVE PRICE ERROR:",
+          error
+        );
+
+        livePriceError =
+          error?.message ||
+          "Live price request failed";
+
+        if (
+          livePriceCache.price !== null
+        ) {
+
+          livePrice =
+            livePriceCache.price;
+
+          livePriceSource =
+            "TWELVE_DATA_PRICE_CACHE";
+
+        } else {
+
+          livePrice =
+            candlePrice;
+
+          livePriceSource =
+            "M5_CANDLE_FALLBACK";
+        }
+      }
+    }
+
+    // =====================================================
+    // SIGNAL PRICE
+    // =====================================================
+
+    // IMPORTANT:
+    // Signal engine tetap menggunakan
+    // close candle M5 supaya logic V10 tidak berubah.
+
+    const price = candlePrice;
 
     // =====================================================
     // HELPERS
@@ -693,8 +831,6 @@ export default async function handler(req, res) {
     const c5 = m5.map(c => c.close);
     const c15 = m15.map(c => c.close);
     const c1 = h1.map(c => c.close);
-
-    const price = c5.at(-1);
 
     // =====================================================
     // H1 CONTEXT
@@ -1685,7 +1821,11 @@ export default async function handler(req, res) {
       m5ATR !== null
     ) {
 
-      entry = price;
+      // IMPORTANT:
+      // Entry menggunakan LIVE PRICE,
+      // bukan M5 candle close.
+
+      entry = livePrice;
 
       const recentLow =
         lowest(
@@ -1764,7 +1904,7 @@ export default async function handler(req, res) {
       ok: true,
 
       version:
-        "V10-SCALP-CONTINUATION-REVERSAL-MANIPULATION",
+        "V10-SCALP-CONTINUATION-REVERSAL-MANIPULATION-LIVEPRICE",
 
       symbol:
         CFG.symbol,
@@ -1773,10 +1913,10 @@ export default async function handler(req, res) {
         "SCALP",
 
       architecture:
-        "ONE-M5-API-CALL",
+        "M5-SIGNAL + LIVE-PRICE",
 
       apiUsage:
-        "1 Twelve Data request max per cache refresh",
+        "1 Twelve Data time_series request / 60s + 1 price request / 5s cache",
 
       cache: {
         active:
@@ -1794,7 +1934,34 @@ export default async function handler(req, res) {
           CFG.cacheTTL / 1000
       },
 
-      price,
+      livePrice: {
+        price: livePrice,
+
+        source:
+          livePriceSource,
+
+        ageSeconds:
+          livePriceCache.fetchedAt
+            ? Math.round(
+                (
+                  Date.now() -
+                  livePriceCache.fetchedAt
+                ) / 1000
+              )
+            : null,
+
+        ttlSeconds:
+          CFG.livePriceTTL / 1000,
+
+        error:
+          livePriceError
+      },
+
+      // Live price untuk dashboard
+      price: livePrice,
+
+      // Close candle M5 untuk debugging
+      candlePrice,
 
       candles:
         m5.slice(-60),
