@@ -1,0 +1,4 @@
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+self.addEventListener('push',event=>{let d={};try{d=event.data?event.data.json():{}}catch(e){d={body:event.data?.text?.()||''}}const title=d.title||'XAU/USD Signal';const options={body:d.body||'Signal detected',tag:'xau-signal',renotify:true,requireInteraction:true,badge:'/manifest-icon.svg',data:{url:d.url||'/'}};event.waitUntil(self.registration.showNotification(title,options))});
+self.addEventListener('notificationclick',event=>{event.notification.close();const url=event.notification.data?.url||'/';event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const c of list){if('focus'in c)return c.focus()}return self.clients.openWindow?self.clients.openWindow(url):undefined}))});
