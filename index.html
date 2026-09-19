@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>XAU/USD H1 Structure</title>
+<style>
+:root{--bg:#0b0f14;--card:#11161d;--line:#202832;--text:#e7edf4;--muted:#8793a2;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;padding:12px}.wrap{max-width:720px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.brand{font-size:16px;font-weight:900}.sub{font-size:9px;color:var(--muted);margin-top:3px}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:7px;padding:8px 10px;font-weight:800}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:12px}.full{grid-column:1/-1}.label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}.price{font-size:34px;font-weight:950;margin-top:4px}.live{color:var(--green)}.metric{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #1a222c;font-size:11px}.metric:last-child{border-bottom:0}.metric b{text-align:right}.pill{display:inline-block;border:1px solid var(--line);border-radius:5px;padding:4px 7px;font-size:10px;font-weight:900}.bull{color:var(--green)}.bear{color:var(--red)}.neutral{color:var(--yellow)}.target{font-size:24px;font-weight:950;margin-top:4px}.section{font-size:11px;font-weight:900;border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:3px}.muted{color:var(--muted)}.status{font-weight:900}.error{color:var(--red);font-size:11px;white-space:pre-wrap}.small{font-size:9px;color:var(--muted);margin-top:5px}@media(max-width:560px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="top"><div><div class="brand">XAU/USD · H1 STRUCTURE</div><div class="sub">LIVE PRICE · H1 SUPPORT/RESISTANCE · BOS · CHOCH</div></div><button class="btn" onclick="loadData()">↻ Refresh</button></div>
+<div id="error" class="error"></div>
+<div class="grid">
+<div class="card full"><div class="label">LIVE PRICE</div><div id="price" class="price live">--</div><div id="priceMeta" class="small">--</div></div>
+<div class="card"><div class="section">NEAREST H1 SUPPORT</div><div id="support" class="target">--</div><div id="supportDist" class="small">--</div></div>
+<div class="card"><div class="section">NEAREST H1 RESISTANCE</div><div id="resistance" class="target">--</div><div id="resistanceDist" class="small">--</div></div>
+<div class="card full"><div class="section">H1 MARKET STRUCTURE</div><div class="metric"><span>Bias</span><b id="bias">--</b></div><div class="metric"><span>High Structure</span><b id="highPattern">--</b></div><div class="metric"><span>Low Structure</span><b id="lowPattern">--</b></div><div class="metric"><span>Last Swing High</span><b id="lastHigh">--</b></div><div class="metric"><span>Last Swing Low</span><b id="lastLow">--</b></div></div>
+<div class="card"><div class="section">BOS</div><div id="bos" class="pill neutral">NONE</div><div id="bosLevel" class="small">--</div></div>
+<div class="card"><div class="section">CHOCH</div><div id="choch" class="pill neutral">NONE</div><div id="chochLevel" class="small">--</div></div>
+<div class="card full"><div class="section">BOS TARGET LOGIC</div><div id="targetTitle" class="label">NO ACTIVE BOS</div><div id="target" class="target">--</div><div id="targetMeta" class="small">Bullish BOS → nearest resistance above live price. Bearish BOS → nearest support below live price.</div></div>
+<div class="card full"><div class="section">SYSTEM</div><div class="metric"><span>H1 candles</span><b id="candles">--</b></div><div class="metric"><span>Last closed H1</span><b id="lastClosed">--</b></div><div class="metric"><span>Data cache</span><b id="cache">--</b></div><div class="metric"><span>Version</span><b id="version">--</b></div></div>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);const fmt=(v,d=2)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'--';
+function cls(el,kind){el.className='pill '+(kind==='BULLISH'?'bull':kind==='BEARISH'?'bear':'neutral')}
+function render(d){$('error').textContent='';$('price').textContent=fmt(d.livePrice);$('priceMeta').textContent=`${d.livePriceSource||'--'} · ${d.livePriceAgeSeconds??'--'}s · refresh 10s`;
+const h=d.h1||{},s=h.structure||{};const sup=h.support,res=h.resistance; $('support').textContent=sup?fmt(sup.price):'NONE';$('supportDist').textContent=sup?`Distance ${fmt(sup.distance)}`:'No confirmed H1 swing low below live price';$('resistance').textContent=res?fmt(res.price):'NONE';$('resistanceDist').textContent=res?`Distance ${fmt(res.distance)}`:'No confirmed H1 swing high above live price';
+$('bias').textContent=s.bias||'--';$('bias').className=s.bias==='BULLISH'?'bull':s.bias==='BEARISH'?'bear':'neutral';$('highPattern').textContent=s.highPattern||'--';$('lowPattern').textContent=s.lowPattern||'--';$('lastHigh').textContent=fmt(s.lastSwingHigh);$('lastLow').textContent=fmt(s.lastSwingLow);
+const bos=h.bos,choch=h.choch;$('bos').textContent=bos?bos.direction:'NONE';cls($('bos'),bos?.direction);$('bosLevel').textContent=bos?`Broken level ${fmt(bos.level)} · ${bos.time}`:'No new BOS on last closed H1 candle';$('choch').textContent=choch?choch.direction:'NONE';cls($('choch'),choch?.direction);$('chochLevel').textContent=choch?`Broken level ${fmt(choch.level)} · ${choch.time}`:'No new CHOCH on last closed H1 candle';
+if(h.breakTarget&&h.bos){$('targetTitle').textContent=h.bos.direction==='BULLISH'?'BULLISH BOS → RESISTANCE':'BEARISH BOS → SUPPORT';$('target').textContent=fmt(h.breakTarget.price);$('targetMeta').textContent=`Nearest confirmed H1 level · distance ${fmt(h.breakTarget.distance)}`;}else{$('targetTitle').textContent='NO ACTIVE BOS';$('target').textContent='--';$('targetMeta').textContent='Bullish BOS → nearest resistance above live price. Bearish BOS → nearest support below live price.'}
+$('candles').textContent=`${h.closedCandles??'--'} closed / ${h.candles??'--'} total`;$('lastClosed').textContent=h.lastClosedTime||'--';$('cache').textContent=(d.cache?.candleAgeSeconds??'--')+'s / '+(d.cache?.candleTTLSeconds??'--')+'s';$('version').textContent=d.version||'--';}
+async function loadData(){try{const r=await fetch('/api/scalp?ts='+Date.now(),{cache:'no-store'});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'API error');render(d)}catch(e){$('error').textContent='API ERROR: '+e.message}}
+setInterval(loadData,10000);loadData();
+</script></body></html>
