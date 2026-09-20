@@ -1,58 +1,1646 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f6f8fb"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f8fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <title>XAUUSD Zone Engine V2</title>
+
 <style>
-:root{--bg:#f4f7fb;--card:#fff;--line:#e3e8ef;--text:#152033;--muted:#738096;--green:#079669;--red:#d53b51;--amber:#b87500;--blue:#2d68d7;--purple:#7353d3;--shadow:0 8px 30px rgba(30,45,70,.07)}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f9fbff,#f2f5f9);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text)}
-.wrap{max-width:1240px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.brand{display:flex;gap:10px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:#162033;color:#ffd86b;display:grid;place-items:center;font-size:22px;box-shadow:0 7px 18px #17203318}.title{font-weight:950;font-size:19px}.sub{font-size:10px;color:var(--muted);margin-top:3px}.topRight{display:flex;align-items:center;gap:7px}.live{display:flex;align-items:center;gap:6px;color:var(--green);font-size:10px;font-weight:900}.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;font-weight:850;color:var(--text)}
-.hero{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:12px}.heroRow{display:flex;justify-content:space-between;align-items:center;gap:16px}.tiny{font-size:10px;color:var(--muted)}.price{font-size:38px;font-weight:950;letter-spacing:-1.3px}.signal{font-size:23px;font-weight:950;padding:11px 20px;border-radius:13px;border:1px solid var(--line);text-align:center;min-width:110px}.buy{color:var(--green);background:#ebfbf5;border-color:#bcebd9}.sell{color:var(--red);background:#fff0f2;border-color:#f3c4cc}.wait{color:var(--amber);background:#fff8e8;border-color:#f0d99b}.meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.pill{padding:6px 9px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:850;background:#fafbfc}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow);min-width:0}.full{grid-column:1/-1}.ct{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.ct h2{margin:0;font-size:13px;font-weight:950}.badge{font-size:9px;padding:5px 7px;border-radius:8px;background:#f2f5f8;color:var(--muted);font-weight:950;white-space:nowrap}.tfgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tf{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fbfcfe}.tf b{display:block;font-size:10px;color:var(--muted)}.tf strong{display:block;font-size:17px;margin-top:5px}.rows{display:grid;gap:7px}.row{display:flex;justify-content:space-between;gap:12px;font-size:10px}.row span{color:var(--muted)}.row b{text-align:right;max-width:65%}.zonegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.zone{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fbfcfe}.zoneHead{display:flex;justify-content:space-between;gap:8px}.zoneTitle{font-size:11px;font-weight:950}.score{font-size:10px;font-weight:950}.zonePrice{font-size:14px;font-weight:950;margin:7px 0}.chips{display:flex;flex-wrap:wrap;gap:4px}.chip{font-size:8px;padding:4px 6px;border-radius:6px;background:#eef2f7;color:#667085}.fresh{background:#e8f9f1;color:#07875f}.gradeA{background:#eeeaff;color:#674cc7}.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.check{display:flex;justify-content:space-between;border:1px solid var(--line);padding:9px;border-radius:10px;font-size:10px}.yes{color:var(--green);font-weight:950}.no{color:var(--muted);font-weight:800}.trade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.tradeItem{border:1px solid var(--line);border-radius:11px;padding:10px;background:#fbfcfe}.tradeItem span{display:block;color:var(--muted);font-size:9px}.tradeItem b{display:block;margin-top:5px;font-size:14px}.liq{display:grid;grid-template-columns:1fr 1fr;gap:10px}.list{display:grid;gap:6px}.li{display:flex;justify-content:space-between;gap:7px;font-size:9px;border-bottom:1px dashed var(--line);padding-bottom:5px}.map{display:grid;gap:7px}.mapbar{height:12px;border-radius:99px;background:#edf1f5;position:relative;overflow:hidden}.mapbar i{position:absolute;top:0;height:100%;border-radius:99px}.aboveBar{right:0;width:44%;background:#f5c7cf}.belowBar{left:0;width:44%;background:#bfe9d9}.error{display:none;background:#fff0f2;border:1px solid #f1c5cc;color:var(--red);padding:12px;border-radius:12px;font-size:11px;margin-bottom:12px}.footer{text-align:center;color:var(--muted);font-size:9px;padding:18px 4px}.loading{opacity:.62}.mutedBox{padding:10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:10px;background:#fbfcfe}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.trade{grid-template-columns:repeat(2,1fr)}.zonegrid{grid-template-columns:1fr}.topRight .live{display:none}}@media(max-width:480px){.wrap{padding:9px}.heroRow{align-items:flex-start}.price{font-size:29px}.signal{font-size:18px;padding:9px 13px;min-width:92px}.tfgrid,.checks{grid-template-columns:1fr}.liq{grid-template-columns:1fr}}
-</style>
-<style>.sniper-command{margin:14px auto 18px;max-width:1180px;border:1px solid #d8dee9;border-radius:22px;background:linear-gradient(145deg,#fff,#f6f8fb);box-shadow:0 12px 32px rgba(15,23,42,.08);padding:18px;color:#0f172a}.sc-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.sc-kicker{font-size:11px;font-weight:800;letter-spacing:.16em;color:#64748b}.sc-decision{font-size:42px;line-height:1;font-weight:950;margin-top:6px}.sc-decision.buy{color:#059669}.sc-decision.sell{color:#dc2626}.sc-decision.wait{color:#d97706}.sc-status{margin-top:7px;font-size:13px;font-weight:700;color:#64748b}.sc-score{min-width:70px;height:70px;border-radius:18px;display:grid;place-items:center;background:#eef2f7;font-size:20px;font-weight:900}.sc-grid,.sc-plan{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px}.sc-grid>div,.sc-plan>div{padding:10px 11px;border-radius:14px;background:#f8fafc;border:1px solid #e5e7eb}.sc-grid span,.sc-plan span{display:block;font-size:9px;font-weight:800;color:#64748b;letter-spacing:.08em}.sc-grid b,.sc-plan b{display:block;margin-top:4px;font-size:12px}.sc-plan{margin-top:9px}.sc-plan b{font-size:13px}.sc-reason{margin-top:12px;padding:11px 13px;border-radius:13px;background:#f1f5f9;font-size:12px;font-weight:700;color:#334155}@media(max-width:720px){.sniper-command{margin:10px 0 14px;padding:14px;border-radius:18px}.sc-decision{font-size:34px}.sc-grid{grid-template-columns:repeat(3,1fr)}.sc-plan{grid-template-columns:repeat(3,1fr)}.sc-score{min-width:58px;height:58px}}</style></head>
-<body><section id="sniperCommand" class="sniper-command"><div class="sc-head"><div><div class="sc-kicker">XAUUSD SNIPER COMMAND</div><div id="scDecision" class="sc-decision wait">WAIT</div><div id="scStatus" class="sc-status">Waiting for market data…</div></div><div id="scScore" class="sc-score">--</div></div><div class="sc-grid"><div><span>M15</span><b id="scM15">--</b></div><div><span>M5</span><b id="scM5">--</b></div><div><span>ZONE</span><b id="scZone">--</b></div><div><span>LIQUIDITY</span><b id="scLiquidity">--</b></div><div><span>STRUCTURE</span><b id="scStructure">--</b></div><div><span>FVG</span><b id="scFvg">--</b></div></div><div class="sc-plan"><div><span>ENTRY</span><b id="scEntry">--</b></div><div><span>SL</span><b id="scSL">--</b></div><div><span>TP1</span><b id="scTP1">--</b></div><div><span>TP2</span><b id="scTP2">--</b></div><div><span>TP3</span><b id="scTP3">--</b></div><div><span>RR</span><b id="scRR">--</b></div></div><div id="scReason" class="sc-reason">Wait for M15 + M5 alignment and qualified zone confirmation.</div></section>
-<div class="wrap">
-<header class="top"><div class="brand"><div class="logo">🥇</div><div><div class="title">XAUUSD ZONE ENGINE</div><div class="sub">Structure · Liquidity · Supply/Demand · OB · FVG · Scalp</div></div></div><div class="topRight"><div class="live"><span class="dot"></span><span id="liveText">LIVE</span></div><button onclick="load()">Refresh</button></div></header>
-<div id="err" class="error"></div>
-<section class="hero"><div class="heroRow"><div><div class="tiny">XAU/USD · LIVE PRICE</div><div id="price" class="price">—</div><div id="updated" class="tiny">Loading…</div></div><div style="text-align:right"><div id="signal" class="signal wait">WAIT</div><div class="tiny" style="margin-top:7px">Confidence <b id="confidence">—</b></div></div></div><div class="meta"><div id="bias" class="pill">BIAS —</div><div id="hold" class="pill">HOLD —</div><div id="strength" class="pill">—</div><div id="session" class="pill">SESSION —</div><div id="market" class="pill">MARKET —</div></div></section>
-<div class="grid">
-<section class="card"><div class="ct"><h2>Timeframe Alignment</h2><span class="badge">CORE RULE</span></div><div class="tfgrid" id="tfs"></div><div class="mutedBox" style="margin-top:9px">Scalp BUY/SELL requires M15 and M5 to point in the same direction. H1 is context/hold, not a veto.</div></section>
-<section class="card"><div class="ct"><h2>Confluence Engine</h2><span class="badge">M15 + M5</span></div><div class="checks" id="checks"></div></section>
-<section class="card full"><div class="ct"><h2>Top Zones</h2><span class="badge">MULTI-FACTOR RANKING</span></div><div class="zonegrid" id="zones"></div></section>
-<section class="card full"><div class="ct"><h2>Dynamic Trade Plan</h2><span id="planBadge" class="badge">WAIT</span></div><div class="trade" id="trade"></div><div id="invalid" class="tiny" style="margin-top:10px"></div></section>
-<section class="card"><div class="ct"><h2>Liquidity Map</h2><span class="badge">PDH · PDL · PWH · PWL · EQ</span></div><div class="liq"><div><div class="tiny" style="margin-bottom:7px">ABOVE PRICE</div><div id="above" class="list"></div></div><div><div class="tiny" style="margin-bottom:7px">BELOW PRICE</div><div id="below" class="list"></div></div></div></section>
-<section class="card"><div class="ct"><h2>H1 Context / Hold</h2><span class="badge">HTF</span></div><div id="h1" class="rows"></div></section>
-<section class="card"><div class="ct"><h2>Zone Intelligence</h2><span class="badge">FRESHNESS + SOURCES</span></div><div id="details" class="rows"></div></section>
-<section class="card"><div class="ct"><h2>Risk / Session Filter</h2><span id="riskBadge" class="badge">MONITOR</span></div><div id="risk" class="rows"></div></section>
-</div>
-<div class="footer">XAUUSD Zone Engine V2 · Analytical engine only. A zone is an inference from price structure, not a direct view of institutional orders or a centralized spot-gold order book.</div>
-</div>
-<script>
-const $=id=>document.getElementById(id); const fmt=x=>Number.isFinite(+x)?(+x).toFixed(2):"—";
-const biasCls=b=>b==="BULLISH"?"buy":b==="BEARISH"?"sell":"wait";
-function row(a,b){return `<div class="row"><span>${a}</span><b>${b??"—"}</b></div>`}
-function zoneCard(z){const grade=z.grade||"—";return `<div class="zone"><div class="zoneHead"><div class="zoneTitle">${z.side==="DEMAND"?"🟢":"🔴"} ${z.side} · ${z.tf}</div><div class="score">${grade} · ${Math.round(z.score)}</div></div><div class="zonePrice">${fmt(z.low)} — ${fmt(z.high)}</div><div class="chips">${(z.sources||[]).map(x=>`<span class="chip">${x}</span>`).join("")}${z.fresh?'<span class="chip fresh">FRESH</span>':''}</div><div class="tiny" style="margin-top:7px">${z.position} · ${fmt(z.distance)} away · touches ${z.touches??0}</div></div>`}
-function liItem(x){return `<div class="li"><span>${x.name} <small style="color:#a0a8b5">${x.type||""}</small></span><b>${fmt(x.price)}</b></div>`}
-function render(d){
- $('price').textContent=fmt(d.livePrice); $('updated').textContent=new Date(d.timestamp).toLocaleString();
- $('signal').textContent=d.signal; $('signal').className='signal '+biasCls(d.signal==='BUY'?'BULLISH':d.signal==='SELL'?'BEARISH':'NEUTRAL');
- $('confidence').textContent=(d.confidence??0)+'%'; $('bias').textContent='BIAS '+d.bias; $('hold').textContent=(d.holdContext?.status||'WAIT').replaceAll('_',' '); $('strength').textContent=d.signalStrength||'—';
- $('session').textContent='SESSION '+(d.session?.name||'—'); $('market').textContent=d.marketOpen?'MARKET ACTIVE':'MARKET CLOSED/RISK'; $('liveText').textContent=d.marketOpen?'LIVE':'CLOSED';
- $('tfs').innerHTML=[d.h1,d.m15,d.m5].map(x=>`<div class="tf"><b>${x.tf}</b><strong class="${biasCls(x.bias)}">${x.bias}</strong><div class="tiny">Trend ${x.trend}</div><div class="tiny">RSI ${fmt(x.rsi)} · ATR ${fmt(x.atr)}</div><div class="tiny">BOS ${x.structure?.bos||'—'}</div></div>`).join('');
- const c=d.confluence||{}; const labels={m15Alignment:'M15 + M5 searah',m5Structure:'M5 structure',zone:'Qualified zone',liquiditySweep:'Liquidity sweep',displacement:'Displacement',marketStructureShift:'M5 MSS',fvg:'FVG / imbalance',orderBlock:'Order Block',h1Context:'H1 agrees'};
- $('checks').innerHTML=Object.entries(labels).map(([k,v])=>`<div class="check"><span>${v}</span><b class="${c[k]?'yes':'no'}">${c[k]?'YES':'—'}</b></div>`).join('');
- const zs=d.zones?.near||[]; $('zones').innerHTML=zs.length?zs.slice(0,10).map(zoneCard).join(''):'<div class="mutedBox">No qualified nearby zone.</div>';
- const p=d.tradePlan||{}; $('planBadge').textContent=p.active?p.direction:'WAIT';
- const vals=[['ENTRY LOW',p.entryLow],['ENTRY HIGH',p.entryHigh],['ENTRY',p.entry],['STOP LOSS',p.stopLoss],['TP1',p.tp1],['TP2',p.tp2],['TP3',p.tp3],['R:R',p.rr]];
- $('trade').innerHTML=vals.map(x=>`<div class="tradeItem"><span>${x[0]}</span><b>${x[1]==null?'—':fmt(x[1])}</b></div>`).join(''); $('invalid').textContent=p.invalidation||'Trade plan inactive.';
- $('above').innerHTML=(d.liquidity?.above||[]).slice(0,7).map(liItem).join('')||'<span class="tiny">None</span>'; $('below').innerHTML=(d.liquidity?.below||[]).slice(0,7).map(liItem).join('')||'<span class="tiny">None</span>';
- const h=d.h1||{}; $('h1').innerHTML=row('Direction',h.bias)+row('Trend',h.trend)+row('BOS',h.structure?.bos||'—')+row('High pattern',h.structure?.priorHighPattern||'—')+row('Low pattern',h.structure?.priorLowPattern||'—')+row('EMA20',fmt(h.ema20))+row('EMA50',fmt(h.ema50))+row('RSI14',fmt(h.rsi))+row('ATR14',fmt(h.atr));
- const active=zs[0]; $('details').innerHTML=active?row('Nearest / strongest',active.side)+row('TF',active.tf)+row('Range',fmt(active.low)+' — '+fmt(active.high))+row('Grade',active.grade)+row('Score',Math.round(active.score))+row('Fresh',active.fresh?'YES':'NO')+row('Touches',active.touches)+row('Sources',(active.sources||[]).join(', '))+row('Position',active.position):row('Zone','None');
- const r=d.riskFilter||{}; $('riskBadge').textContent=r.blockSignal?'BLOCK':'MONITOR'; $('risk').innerHTML=row('State',r.state)+row('Reason',r.reason)+row('Calendar feed',r.available?'AVAILABLE':'NOT CONNECTED')+row('Signal block',r.blockSignal?'YES':'NO')+row('Session',d.session?.name||'—');
+:root{
+  --bg:#f4f7fb;
+  --card:#fff;
+  --line:#e3e8ef;
+  --text:#152033;
+  --muted:#738096;
+  --green:#079669;
+  --red:#d53b51;
+  --amber:#b87500;
+  --blue:#2d68d7;
+  --purple:#7353d3;
+  --shadow:0 8px 30px rgba(30,45,70,.07)
 }
-async function load(){try{$('err').style.display='none';document.body.classList.add('loading');const r=await fetch('/api/scalp?x='+Date.now(),{cache:'no-store'});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'API error');render(d);if(window.updateSniperCommand)window.updateSniperCommand(d)}catch(e){$('err').style.display='block';$('err').textContent='API error: '+e.message}finally{document.body.classList.remove('loading')}}
-load(); setInterval(load,15000);
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:linear-gradient(180deg,#f9fbff,#f2f5f9);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  color:var(--text)
+}
+
+.wrap{
+  max-width:1240px;
+  margin:auto;
+  padding:14px
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px
+}
+
+.brand{
+  display:flex;
+  gap:10px;
+  align-items:center
+}
+
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:#162033;
+  color:#ffd86b;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  box-shadow:0 7px 18px #17203318
+}
+
+.title{
+  font-weight:950;
+  font-size:19px
+}
+
+.sub{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:3px
+}
+
+.topRight{
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+
+.live{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:var(--green);
+  font-size:10px;
+  font-weight:900
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green)
+}
+
+button{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  padding:8px 11px;
+  font-weight:850;
+  color:var(--text)
+}
+
+.hero{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:12px
+}
+
+.heroRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px
+}
+
+.tiny{
+  font-size:10px;
+  color:var(--muted)
+}
+
+.price{
+  font-size:38px;
+  font-weight:950;
+  letter-spacing:-1.3px
+}
+
+.signal{
+  font-size:23px;
+  font-weight:950;
+  padding:11px 20px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  text-align:center;
+  min-width:110px
+}
+
+.buy{
+  color:var(--green);
+  background:#ebfbf5;
+  border-color:#bcebd9
+}
+
+.sell{
+  color:var(--red);
+  background:#fff0f2;
+  border-color:#f3c4cc
+}
+
+.wait{
+  color:var(--amber);
+  background:#fff8e8;
+  border-color:#f0d99b
+}
+
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:14px
+}
+
+.pill{
+  padding:6px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:10px;
+  font-weight:850;
+  background:#fafbfc
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px;
+  box-shadow:var(--shadow);
+  min-width:0
+}
+
+.full{
+  grid-column:1/-1
+}
+
+.ct{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px
+}
+
+.ct h2{
+  margin:0;
+  font-size:13px;
+  font-weight:950
+}
+
+.badge{
+  font-size:9px;
+  padding:5px 7px;
+  border-radius:8px;
+  background:#f2f5f8;
+  color:var(--muted);
+  font-weight:950;
+  white-space:nowrap
+}
+
+.tfgrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px
+}
+
+.tf{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px;
+  background:#fbfcfe
+}
+
+.tf b{
+  display:block;
+  font-size:10px;
+  color:var(--muted)
+}
+
+.tf strong{
+  display:block;
+  font-size:17px;
+  margin-top:5px
+}
+
+.rows{
+  display:grid;
+  gap:7px
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:10px
+}
+
+.row span{
+  color:var(--muted)
+}
+
+.row b{
+  text-align:right;
+  max-width:65%
+}
+
+.zonegrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px
+}
+
+.zone{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px;
+  background:#fbfcfe
+}
+
+.zoneHead{
+  display:flex;
+  justify-content:space-between;
+  gap:8px
+}
+
+.zoneTitle{
+  font-size:11px;
+  font-weight:950
+}
+
+.score{
+  font-size:10px;
+  font-weight:950
+}
+
+.zonePrice{
+  font-size:14px;
+  font-weight:950;
+  margin:7px 0
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px
+}
+
+.chip{
+  font-size:8px;
+  padding:4px 6px;
+  border-radius:6px;
+  background:#eef2f7;
+  color:#667085
+}
+
+.fresh{
+  background:#e8f9f1;
+  color:#07875f
+}
+
+.gradeA{
+  background:#eeeaff;
+  color:#674cc7
+}
+
+.checks{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:7px
+}
+
+.check{
+  display:flex;
+  justify-content:space-between;
+  border:1px solid var(--line);
+  padding:9px;
+  border-radius:10px;
+  font-size:10px
+}
+
+.yes{
+  color:var(--green);
+  font-weight:950
+}
+
+.no{
+  color:var(--muted);
+  font-weight:800
+}
+
+.trade{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px
+}
+
+.tradeItem{
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px;
+  background:#fbfcfe
+}
+
+.tradeItem span{
+  display:block;
+  color:var(--muted);
+  font-size:9px
+}
+
+.tradeItem b{
+  display:block;
+  margin-top:5px;
+  font-size:14px
+}
+
+.liq{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px
+}
+
+.list{
+  display:grid;
+  gap:6px
+}
+
+.li{
+  display:flex;
+  justify-content:space-between;
+  gap:7px;
+  font-size:9px;
+  border-bottom:1px dashed var(--line);
+  padding-bottom:5px
+}
+
+.map{
+  display:grid;
+  gap:7px
+}
+
+.mapbar{
+  height:12px;
+  border-radius:99px;
+  background:#edf1f5;
+  position:relative;
+  overflow:hidden
+}
+
+.mapbar i{
+  position:absolute;
+  top:0;
+  height:100%;
+  border-radius:99px
+}
+
+.aboveBar{
+  right:0;
+  width:44%;
+  background:#f5c7cf
+}
+
+.belowBar{
+  left:0;
+  width:44%;
+  background:#bfe9d9
+}
+
+.error{
+  display:none;
+  background:#fff0f2;
+  border:1px solid #f1c5cc;
+  color:var(--red);
+  padding:12px;
+  border-radius:12px;
+  font-size:11px;
+  margin-bottom:12px
+}
+
+.footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:9px;
+  padding:18px 4px
+}
+
+.loading{
+  opacity:.62
+}
+
+.mutedBox{
+  padding:10px;
+  border:1px dashed var(--line);
+  border-radius:10px;
+  color:var(--muted);
+  font-size:10px;
+  background:#fbfcfe
+}
+
+@media(max-width:720px){
+  .grid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .trade{grid-template-columns:repeat(2,1fr)}
+  .zonegrid{grid-template-columns:1fr}
+  .topRight .live{display:none}
+}
+
+@media(max-width:480px){
+  .wrap{padding:9px}
+  .heroRow{align-items:flex-start}
+  .price{font-size:29px}
+  .signal{
+    font-size:18px;
+    padding:9px 13px;
+    min-width:92px
+  }
+  .tfgrid,.checks{grid-template-columns:1fr}
+  .liq{grid-template-columns:1fr}
+}
+</style>
+
+<style>
+.sniper-command{
+  margin:14px auto 18px;
+  max-width:1180px;
+  border:1px solid #d8dee9;
+  border-radius:22px;
+  background:linear-gradient(145deg,#fff,#f6f8fb);
+  box-shadow:0 12px 32px rgba(15,23,42,.08);
+  padding:18px;
+  color:#0f172a
+}
+
+.sc-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px
+}
+
+.sc-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.16em;
+  color:#64748b
+}
+
+.sc-decision{
+  font-size:42px;
+  line-height:1;
+  font-weight:950;
+  margin-top:6px
+}
+
+.sc-decision.buy{color:#059669}
+.sc-decision.sell{color:#dc2626}
+.sc-decision.wait{color:#d97706}
+
+.sc-status{
+  margin-top:7px;
+  font-size:13px;
+  font-weight:700;
+  color:#64748b
+}
+
+.sc-score{
+  min-width:70px;
+  height:70px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:#eef2f7;
+  font-size:20px;
+  font-weight:900
+}
+
+.sc-grid,.sc-plan{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  margin-top:16px
+}
+
+.sc-grid>div,.sc-plan>div{
+  padding:10px 11px;
+  border-radius:14px;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  min-width:0
+}
+
+.sc-grid span,.sc-plan span{
+  display:block;
+  font-size:9px;
+  font-weight:800;
+  color:#64748b;
+  letter-spacing:.08em
+}
+
+.sc-grid b,.sc-plan b{
+  display:block;
+  margin-top:4px;
+  font-size:12px;
+  word-break:break-word
+}
+
+.sc-plan{
+  margin-top:9px
+}
+
+.sc-plan b{
+  font-size:13px
+}
+
+.sc-reason{
+  margin-top:12px;
+  padding:11px 13px;
+  border-radius:13px;
+  background:#f1f5f9;
+  font-size:12px;
+  font-weight:700;
+  color:#334155
+}
+
+@media(max-width:720px){
+  .sniper-command{
+    margin:10px 0 14px;
+    padding:14px;
+    border-radius:18px
+  }
+
+  .sc-decision{
+    font-size:34px
+  }
+
+  .sc-grid{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .sc-plan{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .sc-score{
+    min-width:58px;
+    height:58px
+  }
+}
+</style>
+</head>
+
+<body>
+
+<section id="sniperCommand" class="sniper-command">
+
+  <div class="sc-head">
+    <div>
+      <div class="sc-kicker">XAUUSD SNIPER COMMAND</div>
+      <div id="scDecision" class="sc-decision wait">WAIT</div>
+      <div id="scStatus" class="sc-status">Waiting for market data…</div>
+    </div>
+
+    <div id="scScore" class="sc-score">--</div>
+  </div>
+
+  <div class="sc-grid">
+
+    <div>
+      <span>M15</span>
+      <b id="scM15">--</b>
+    </div>
+
+    <div>
+      <span>M5</span>
+      <b id="scM5">--</b>
+    </div>
+
+    <div>
+      <span>ZONE</span>
+      <b id="scZone">--</b>
+    </div>
+
+    <div>
+      <span>LIQUIDITY</span>
+      <b id="scLiquidity">--</b>
+    </div>
+
+    <div>
+      <span>STRUCTURE</span>
+      <b id="scStructure">--</b>
+    </div>
+
+    <div>
+      <span>FVG</span>
+      <b id="scFvg">--</b>
+    </div>
+
+  </div>
+
+  <div class="sc-plan">
+
+    <div>
+      <span>ENTRY</span>
+      <b id="scEntry">--</b>
+    </div>
+
+    <div>
+      <span>SL</span>
+      <b id="scSL">--</b>
+    </div>
+
+    <div>
+      <span>TP1</span>
+      <b id="scTP1">--</b>
+    </div>
+
+    <div>
+      <span>TP2</span>
+      <b id="scTP2">--</b>
+    </div>
+
+    <div>
+      <span>TP3</span>
+      <b id="scTP3">--</b>
+    </div>
+
+    <div>
+      <span>RR</span>
+      <b id="scRR">--</b>
+    </div>
+
+  </div>
+
+  <div id="scReason" class="sc-reason">
+    Wait for M15 + M5 alignment and qualified zone confirmation.
+  </div>
+
+</section>
+
+<div class="wrap">
+
+<header class="top">
+
+  <div class="brand">
+
+    <div class="logo">🥇</div>
+
+    <div>
+      <div class="title">XAUUSD ZONE ENGINE</div>
+      <div class="sub">
+        Structure · Liquidity · Supply/Demand · OB · FVG · Scalp
+      </div>
+    </div>
+
+  </div>
+
+  <div class="topRight">
+
+    <div class="live">
+      <span class="dot"></span>
+      <span id="liveText">LIVE</span>
+    </div>
+
+    <button onclick="load()">Refresh</button>
+
+  </div>
+
+</header>
+
+<div id="err" class="error"></div>
+
+<section class="hero">
+
+  <div class="heroRow">
+
+    <div>
+      <div class="tiny">XAU/USD · LIVE PRICE</div>
+      <div id="price" class="price">—</div>
+      <div id="updated" class="tiny">Loading…</div>
+    </div>
+
+    <div style="text-align:right">
+
+      <div id="signal" class="signal wait">WAIT</div>
+
+      <div class="tiny" style="margin-top:7px">
+        Confidence <b id="confidence">—</b>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="meta">
+
+    <div id="bias" class="pill">BIAS —</div>
+    <div id="hold" class="pill">HOLD —</div>
+    <div id="strength" class="pill">—</div>
+    <div id="session" class="pill">SESSION —</div>
+    <div id="market" class="pill">MARKET —</div>
+
+  </div>
+
+</section>
+
+<div class="grid">
+
+<section class="card">
+
+  <div class="ct">
+    <h2>Timeframe Alignment</h2>
+    <span class="badge">CORE RULE</span>
+  </div>
+
+  <div class="tfgrid" id="tfs"></div>
+
+  <div class="mutedBox" style="margin-top:9px">
+    Scalp BUY/SELL requires M15 and M5 to point in the same direction.
+    H1 is context/hold, not a veto.
+  </div>
+
+</section>
+
+<section class="card">
+
+  <div class="ct">
+    <h2>Confluence Engine</h2>
+    <span class="badge">M15 + M5</span>
+  </div>
+
+  <div class="checks" id="checks"></div>
+
+</section>
+
+<section class="card full">
+
+  <div class="ct">
+    <h2>Top Zones</h2>
+    <span class="badge">MULTI-FACTOR RANKING</span>
+  </div>
+
+  <div class="zonegrid" id="zones"></div>
+
+</section>
+
+<section class="card full">
+
+  <div class="ct">
+    <h2>Dynamic Trade Plan</h2>
+    <span id="planBadge" class="badge">WAIT</span>
+  </div>
+
+  <div class="trade" id="trade"></div>
+
+  <div id="invalid" class="tiny" style="margin-top:10px"></div>
+
+</section>
+
+<section class="card">
+
+  <div class="ct">
+    <h2>Liquidity Map</h2>
+    <span class="badge">PDH · PDL · PWH · PWL · EQ</span>
+  </div>
+
+  <div class="liq">
+
+    <div>
+      <div class="tiny" style="margin-bottom:7px">ABOVE PRICE</div>
+      <div id="above" class="list"></div>
+    </div>
+
+    <div>
+      <div class="tiny" style="margin-bottom:7px">BELOW PRICE</div>
+      <div id="below" class="list"></div>
+    </div>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <div class="ct">
+    <h2>H1 Context / Hold</h2>
+    <span class="badge">HTF</span>
+  </div>
+
+  <div id="h1" class="rows"></div>
+
+</section>
+
+<section class="card">
+
+  <div class="ct">
+    <h2>Zone Intelligence</h2>
+    <span class="badge">FRESHNESS + SOURCES</span>
+  </div>
+
+  <div id="details" class="rows"></div>
+
+</section>
+
+<section class="card">
+
+  <div class="ct">
+    <h2>Risk / Session Filter</h2>
+    <span id="riskBadge" class="badge">MONITOR</span>
+  </div>
+
+  <div id="risk" class="rows"></div>
+
+</section>
+
+</div>
+
+<div class="footer">
+  XAUUSD Zone Engine V2 · Analytical engine only.
+  A zone is an inference from price structure, not a direct view of institutional
+  orders or a centralized spot-gold order book.
+</div>
+
+</div>
+
+<script>
+
+const $=id=>document.getElementById(id);
+
+const fmt=x=>
+  Number.isFinite(+x)
+  ? (+x).toFixed(2)
+  : "—";
+
+const biasCls=b=>
+  b==="BULLISH"
+  ?"buy"
+  :b==="BEARISH"
+  ?"sell"
+  :"wait";
+
+function row(a,b){
+  return `<div class="row">
+    <span>${a}</span>
+    <b>${b??"—"}</b>
+  </div>`;
+}
+
+function zoneCard(z){
+
+  const grade=z.grade||"—";
+
+  return `
+    <div class="zone">
+
+      <div class="zoneHead">
+        <div class="zoneTitle">
+          ${z.side==="DEMAND"?"🟢":"🔴"} ${z.side} · ${z.tf}
+        </div>
+
+        <div class="score">
+          ${grade} · ${Math.round(z.score)}
+        </div>
+      </div>
+
+      <div class="zonePrice">
+        ${fmt(z.low)} — ${fmt(z.high)}
+      </div>
+
+      <div class="chips">
+
+        ${(z.sources||[])
+          .map(x=>`<span class="chip">${x}</span>`)
+          .join("")}
+
+        ${
+          z.fresh
+          ?'<span class="chip fresh">FRESH</span>'
+          :""
+        }
+
+      </div>
+
+      <div class="tiny" style="margin-top:7px">
+        ${z.position} · ${fmt(z.distance)} away · touches ${z.touches??0}
+      </div>
+
+    </div>
+  `;
+}
+
+function liItem(x){
+
+  return `
+    <div class="li">
+      <span>
+        ${x.name}
+        <small style="color:#a0a8b5">${x.type||""}</small>
+      </span>
+      <b>${fmt(x.price)}</b>
+    </div>
+  `;
+}
+
+function render(d){
+
+  $('price').textContent=fmt(d.livePrice);
+
+  $('updated').textContent=
+    new Date(d.timestamp).toLocaleString();
+
+  $('signal').textContent=d.signal;
+
+  $('signal').className=
+    'signal '+
+    biasCls(
+      d.signal==='BUY'
+      ?'BULLISH'
+      :d.signal==='SELL'
+      ?'BEARISH'
+      :'NEUTRAL'
+    );
+
+  $('confidence').textContent=
+    (d.confidence??0)+'%';
+
+  $('bias').textContent=
+    'BIAS '+d.bias;
+
+  $('hold').textContent=
+    (d.holdContext?.status||'WAIT')
+      .replaceAll('_',' ');
+
+  $('strength').textContent=
+    d.signalStrength||'—';
+
+  $('session').textContent=
+    'SESSION '+(d.session?.name||'—');
+
+  $('market').textContent=
+    d.marketOpen
+    ?'MARKET ACTIVE'
+    :'MARKET CLOSED/RISK';
+
+  $('liveText').textContent=
+    d.marketOpen
+    ?'LIVE'
+    :'CLOSED';
+
+  $('tfs').innerHTML=
+    [d.h1,d.m15,d.m5]
+    .filter(Boolean)
+    .map(x=>`
+
+      <div class="tf">
+
+        <b>${x.tf||'—'}</b>
+
+        <strong class="${biasCls(x.bias)}">
+          ${x.bias||'NEUTRAL'}
+        </strong>
+
+        <div class="tiny">
+          Trend ${x.trend||'—'}
+        </div>
+
+        <div class="tiny">
+          RSI ${fmt(x.rsi)} · ATR ${fmt(x.atr)}
+        </div>
+
+        <div class="tiny">
+          BOS ${x.structure?.bos||'—'}
+        </div>
+
+      </div>
+
+    `).join('');
+
+  const c=d.confluence||{};
+
+  const labels={
+    m15Alignment:'M15 + M5 searah',
+    m5Structure:'M5 structure',
+    zone:'Qualified zone',
+    liquiditySweep:'Liquidity sweep',
+    displacement:'Displacement',
+    marketStructureShift:'M5 MSS',
+    fvg:'FVG / imbalance',
+    orderBlock:'Order Block',
+    h1Context:'H1 agrees'
+  };
+
+  $('checks').innerHTML=
+    Object.entries(labels)
+    .map(([k,v])=>`
+
+      <div class="check">
+
+        <span>${v}</span>
+
+        <b class="${c[k]?'yes':'no'}">
+          ${c[k]?'YES':'—'}
+        </b>
+
+      </div>
+
+    `).join('');
+
+  const zs=d.zones?.near||[];
+
+  $('zones').innerHTML=
+    zs.length
+    ?zs.slice(0,10).map(zoneCard).join('')
+    :'<div class="mutedBox">No qualified nearby zone.</div>';
+
+  const p=d.tradePlan||{};
+
+  $('planBadge').textContent=
+    p.active
+    ?p.direction
+    :'WAIT';
+
+  const vals=[
+    ['ENTRY LOW',p.entryLow],
+    ['ENTRY HIGH',p.entryHigh],
+    ['ENTRY',p.entry],
+    ['STOP LOSS',p.stopLoss],
+    ['TP1',p.tp1],
+    ['TP2',p.tp2],
+    ['TP3',p.tp3],
+    ['R:R',p.rr]
+  ];
+
+  $('trade').innerHTML=
+    vals.map(x=>`
+
+      <div class="tradeItem">
+
+        <span>${x[0]}</span>
+
+        <b>
+          ${x[1]==null?'—':fmt(x[1])}
+        </b>
+
+      </div>
+
+    `).join('');
+
+  $('invalid').textContent=
+    p.invalidation||'Trade plan inactive.';
+
+  $('above').innerHTML=
+    (d.liquidity?.above||[])
+    .slice(0,7)
+    .map(liItem)
+    .join('')
+    ||'<span class="tiny">None</span>';
+
+  $('below').innerHTML=
+    (d.liquidity?.below||[])
+    .slice(0,7)
+    .map(liItem)
+    .join('')
+    ||'<span class="tiny">None</span>';
+
+  const h=d.h1||{};
+
+  $('h1').innerHTML=
+    row('Direction',h.bias)+
+    row('Trend',h.trend)+
+    row('BOS',h.structure?.bos||'—')+
+    row('High pattern',h.structure?.priorHighPattern||'—')+
+    row('Low pattern',h.structure?.priorLowPattern||'—')+
+    row('EMA20',fmt(h.ema20))+
+    row('EMA50',fmt(h.ema50))+
+    row('RSI14',fmt(h.rsi))+
+    row('ATR14',fmt(h.atr));
+
+  const active=zs[0];
+
+  $('details').innerHTML=
+    active
+    ?row('Nearest / strongest',active.side)+
+     row('TF',active.tf)+
+     row('Range',fmt(active.low)+' — '+fmt(active.high))+
+     row('Grade',active.grade)+
+     row('Score',Math.round(active.score))+
+     row('Fresh',active.fresh?'YES':'NO')+
+     row('Touches',active.touches)+
+     row('Sources',(active.sources||[]).join(', '))+
+     row('Position',active.position)
+    :row('Zone','None');
+
+  const r=d.riskFilter||{};
+
+  $('riskBadge').textContent=
+    r.blockSignal
+    ?'BLOCK'
+    :'MONITOR';
+
+  $('risk').innerHTML=
+    row('State',r.state)+
+    row('Reason',r.reason)+
+    row(
+      'Calendar feed',
+      r.available
+      ?'AVAILABLE'
+      :'NOT CONNECTED'
+    )+
+    row(
+      'Signal block',
+      r.blockSignal
+      ?'YES'
+      :'NO'
+    )+
+    row(
+      'Session',
+      d.session?.name||'—'
+    );
+}
+
+async function load(){
+
+  try{
+
+    $('err').style.display='none';
+
+    document.body.classList.add('loading');
+
+    const r=
+      await fetch(
+        '/api/scalp?x='+Date.now(),
+        {cache:'no-store'}
+      );
+
+    const d=await r.json();
+
+    if(!r.ok||!d.ok)
+      throw new Error(d.error||'API error');
+
+    render(d);
+
+    if(window.updateSniperCommand)
+      window.updateSniperCommand(d);
+
+  }catch(e){
+
+    $('err').style.display='block';
+
+    $('err').textContent=
+      'API error: '+e.message;
+
+  }finally{
+
+    document.body.classList.remove('loading');
+
+  }
+}
+
+load();
+
+setInterval(load,15000);
+
 </script>
-<script>(function(){function pick(o,keys,f="--"){for(const k of keys){let v=k.split(".").reduce((a,b)=>a?.[b],o);if(v!==undefined&&v!==null&&v!=="")return v}return f}function dir(v){v=String(v||"").toUpperCase();return v.includes("BULL")||v==="BUY"?"BULLISH":v.includes("BEAR")||v==="SELL"?"BEARISH":"NEUTRAL"}function set(i,v){let e=document.getElementById(i);if(e)e.textContent=v??"--"}window.updateSniperCommand=function(d){let sig=pick(d,["signal"],{}),m15=pick(d,["m15"],{}),m5=pick(d,["m5"],{}),plan=pick(d,["tradePlan"],{}),zones=pick(d,["zones"],[]),z=Array.isArray(zones)?zones[0]||{}:zones||{};let raw=pick(sig,["signal","scalpSignal","direction"],pick(d,["scalpSignal","signal"],"WAIT")),dec=String(raw).toUpperCase(),shown=dec.includes("BUY")?"BUY":dec.includes("SELL")?"SELL":"WAIT";let dEl=document.getElementById("scDecision");if(dEl){dEl.textContent=shown;dEl.className="sc-decision "+shown.toLowerCase()}let m15d=dir(pick(m15,["direction","trend","bias"],"")),m5d=dir(pick(m5,["direction","trend","bias"],""));set("scM15",m15d);set("scM5",m5d);set("scZone",String(pick(z,["type","zoneType","direction"],"--")).toUpperCase());set("scLiquidity",String(pick(z,["liquiditySweep","swept","liquidity"],"--")).toUpperCase());set("scStructure",String(pick(m5,["structure","marketStructure","bos","mss","choch"],"--")).toUpperCase());set("scFvg",String(pick(z,["fvg","hasFVG","fvgPresent"],"--")).toUpperCase());set("scScore",pick(sig,["score","confidence","confluenceScore"],pick(d,["score"],"--")));set("scEntry",pick(plan,["entry","entryPrice","entryZone","entryLow"],"--"));set("scSL",pick(plan,["sl","stopLoss","stop"],"--"));set("scTP1",pick(plan,["tp1","TP1"],"--"));set("scTP2",pick(plan,["tp2","TP2"],"--"));set("scTP3",pick(plan,["tp3","TP3"],"--"));set("scRR",pick(plan,["rr","riskReward","RR"],"--"));let status=shown==="BUY"?"SCALP BUY SETUP QUALIFIED":shown==="SELL"?"SCALP SELL SETUP QUALIFIED":"NO QUALIFIED SETUP";if(m15d!==m5d&&m15d!=="NEUTRAL"&&m5d!=="NEUTRAL")status="WAIT — M15 / M5 NOT ALIGNED";set("scStatus",status);set("scReason",shown==="WAIT"?(m15d!==m5d&&m15d!=="NEUTRAL"&&m5d!=="NEUTRAL"?"Wait for M15 and M5 to point in the same direction.":"Wait for a qualified zone + liquidity/structure confirmation."):shown==="BUY"?"M15 + M5 bullish with qualified demand-side confirmation.":"M15 + M5 bearish with qualified supply-side confirmation.")}})();</script></body></html>
+
+<script>
+
+(function(){
+
+  function pick(o,keys,f="--"){
+
+    for(const k of keys){
+
+      let v=
+        k.split(".")
+        .reduce((a,b)=>a?.[b],o);
+
+      if(
+        v!==undefined &&
+        v!==null &&
+        v!==""
+      ){
+        return v;
+      }
+
+    }
+
+    return f;
+  }
+
+  function dir(v){
+
+    v=String(v||"").toUpperCase();
+
+    return
+      v.includes("BULL")||v==="BUY"
+      ?"BULLISH"
+      :v.includes("BEAR")||v==="SELL"
+      ?"BEARISH"
+      :"NEUTRAL";
+  }
+
+  function set(i,v){
+
+    let e=document.getElementById(i);
+
+    if(e)
+      e.textContent=v??"--";
+  }
+
+  window.updateSniperCommand=function(d){
+
+    let sig=
+      pick(d,["signal"],{});
+
+    let m15=
+      pick(d,["m15"],{});
+
+    let m5=
+      pick(d,["m5"],{});
+
+    let plan=
+      pick(d,["tradePlan"],{});
+
+    let zones=
+      pick(d,["zones"],[]);
+
+    let z=
+      Array.isArray(zones)
+      ?zones[0]||{}
+      :zones||{};
+
+    let raw=
+      pick(
+        sig,
+        ["signal","scalpSignal","direction"],
+        pick(
+          d,
+          ["scalpSignal","signal"],
+          "WAIT"
+        )
+      );
+
+    let dec=
+      String(raw).toUpperCase();
+
+    let shown=
+      dec.includes("BUY")
+      ?"BUY"
+      :dec.includes("SELL")
+      ?"SELL"
+      :"WAIT";
+
+    let dEl=
+      document.getElementById("scDecision");
+
+    if(dEl){
+
+      dEl.textContent=shown;
+
+      dEl.className=
+        "sc-decision "+
+        shown.toLowerCase();
+
+    }
+
+    let m15d=
+      dir(
+        pick(
+          m15,
+          ["direction","trend","bias"],
+          ""
+        )
+      );
+
+    let m5d=
+      dir(
+        pick(
+          m5,
+          ["direction","trend","bias"],
+          ""
+        )
+      );
+
+    set("scM15",m15d);
+    set("scM5",m5d);
+
+    set(
+      "scZone",
+      String(
+        pick(
+          z,
+          ["type","zoneType","direction"],
+          "--"
+        )
+      ).toUpperCase()
+    );
+
+    set(
+      "scLiquidity",
+      String(
+        pick(
+          z,
+          [
+            "liquiditySweep",
+            "swept",
+            "liquidity"
+          ],
+          "--"
+        )
+      ).toUpperCase()
+    );
+
+
+    /*
+      FIX UTAMA:
+      m5.structure / marketStructure mungkin
+      merupakan OBJECT.
+
+      Jangan terus buat:
+      String(object)
+
+      sebab itu akan menghasilkan:
+      [object Object]
+
+      Sekarang kita pecahkan object tersebut
+      kepada BOS / MSS / CHoCH / Trend.
+    */
+
+    let st=
+      pick(
+        m5,
+        ["structure","marketStructure"],
+        null
+      );
+
+    let structureText="--";
+
+    if(
+      st &&
+      typeof st==="object"
+    ){
+
+      const bos=
+        st.bos ??
+        st.BOS;
+
+      const mss=
+        st.mss ??
+        st.MSS;
+
+      const choch=
+        st.choch ??
+        st.CHOCH;
+
+      const trend=
+        st.trend ??
+        st.direction ??
+        st.bias;
+
+      const parts=[];
+
+      if(
+        bos!==undefined &&
+        bos!==null &&
+        bos!==""
+      ){
+        parts.push(
+          "BOS "+
+          String(bos).toUpperCase()
+        );
+      }
+
+      if(
+        mss!==undefined &&
+        mss!==null &&
+        mss!==""
+      ){
+        parts.push(
+          "MSS "+
+          String(mss).toUpperCase()
+        );
+      }
+
+      if(
+        choch!==undefined &&
+        choch!==null &&
+        choch!==""
+      ){
+        parts.push(
+          "CHoCH "+
+          String(choch).toUpperCase()
+        );
+      }
+
+      if(
+        trend!==undefined &&
+        trend!==null &&
+        trend!==""
+      ){
+        parts.push(
+          String(trend).toUpperCase()
+        );
+      }
+
+      structureText=
+        parts.length
+        ?parts.join(" · ")
+        :"--";
+
+    }else{
+
+      structureText=
+        String(
+          pick(
+            m5,
+            [
+              "bos",
+              "mss",
+              "choch",
+              "marketStructure"
+            ],
+            "--"
+          )
+        ).toUpperCase();
+
+    }
+
+    set(
+      "scStructure",
+      structureText
+    );
+
+
+    set(
+      "scFvg",
+      String(
+        pick(
+          z,
+          [
+            "fvg",
+            "hasFVG",
+            "fvgPresent"
+          ],
+          "--"
+        )
+      ).toUpperCase()
+    );
+
+    set(
+      "scScore",
+      pick(
+        sig,
+        [
+          "score",
+          "confidence",
+          "confluenceScore"
+        ],
+        pick(
+          d,
+          ["score"],
+          "--"
+        )
+      )
+    );
+
+    set(
+      "scEntry",
+      pick(
+        plan,
+        [
+          "entry",
+          "entryPrice",
+          "entryZone",
+          "entryLow"
+        ],
+        "--"
+      )
+    );
+
+    set(
+      "scSL",
+      pick(
+        plan,
+        [
+          "sl",
+          "stopLoss",
+          "stop"
+        ],
+        "--"
+      )
+    );
+
+    set(
+      "scTP1",
+      pick(
+        plan,
+        ["tp1","TP1"],
+        "--"
+      )
+    );
+
+    set(
+      "scTP2",
+      pick(
+        plan,
+        ["tp2","TP2"],
+        "--"
+      )
+    );
+
+    set(
+      "scTP3",
+      pick(
+        plan,
+        ["tp3","TP3"],
+        "--"
+      )
+    );
+
+    set(
+      "scRR",
+      pick(
+        plan,
+        [
+          "rr",
+          "riskReward",
+          "RR"
+        ],
+        "--"
+      )
+    );
+
+    let status=
+      shown==="BUY"
+      ?"SCALP BUY SETUP QUALIFIED"
+      :shown==="SELL"
+      ?"SCALP SELL SETUP QUALIFIED"
+      :"NO QUALIFIED SETUP";
+
+    if(
+      m15d!==m5d &&
+      m15d!=="NEUTRAL" &&
+      m5d!=="NEUTRAL"
+    ){
+
+      status=
+        "WAIT — M15 / M5 NOT ALIGNED";
+
+    }
+
+    set(
+      "scStatus",
+      status
+    );
+
+    set(
+      "scReason",
+
+      shown==="WAIT"
+
+      ?(
+        m15d!==m5d &&
+        m15d!=="NEUTRAL" &&
+        m5d!=="NEUTRAL"
+
+        ?"Wait for M15 and M5 to point in the same direction."
+
+        :"Wait for a qualified zone + liquidity/structure confirmation."
+      )
+
+      :shown==="BUY"
+
+      ?"M15 + M5 bullish with qualified demand-side confirmation."
+
+      :"M15 + M5 bearish with qualified supply-side confirmation."
+    );
+
+  };
+
+})();
+
+</script>
+
+</body>
+</html>
