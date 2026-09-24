@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f7fa">
+<title>XAUUSD H1 Swing Breakout</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--line:#e3e8ef;--text:#152033;--muted:#738096;--green:#078b63;--red:#d43b50;--amber:#b87500;--blue:#2d68d7;--shadow:0 8px 28px rgba(30,45,70,.07)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fafcff,#f1f4f8);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text)}
+.wrap{max-width:1050px;margin:auto;padding:12px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:43px;height:43px;border-radius:13px;background:#162033;color:#ffd86b;display:grid;place-items:center;font-size:21px}.title{font-weight:950;font-size:19px}.sub{font-size:10px;color:var(--muted);margin-top:3px}
+.topRight{display:flex;gap:8px;align-items:center}.live{display:flex;gap:6px;align-items:center;color:var(--green);font-size:10px;font-weight:900}.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;font-weight:850;color:var(--text)}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:12px}.heroRow{display:flex;justify-content:space-between;align-items:center;gap:16px}.tiny{font-size:10px;color:var(--muted)}.price{font-size:38px;font-weight:950;letter-spacing:-1.3px}.signal{font-size:24px;font-weight:950;padding:12px 22px;border-radius:14px;border:1px solid var(--line);text-align:center;min-width:120px}.buy{color:var(--green);background:#ebfbf5;border-color:#bcebd9}.sell{color:var(--red);background:#fff0f2;border-color:#f3c4cc}.wait{color:var(--amber);background:#fff8e8;border-color:#f0d99b}
+.meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.pill{padding:6px 9px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:850;background:#fafbfc}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow);min-width:0}.full{grid-column:1/-1}.ct{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.ct h2{margin:0;font-size:13px;font-weight:950}.badge{font-size:9px;padding:5px 7px;border-radius:8px;background:#f2f5f8;color:var(--muted);font-weight:950}
+.trade{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.item{border:1px solid var(--line);border-radius:11px;padding:10px;background:#fbfcfe}.item span{display:block;color:var(--muted);font-size:9px}.item b{display:block;margin-top:5px;font-size:14px}
+.rows{display:grid;gap:8px}.row{display:flex;justify-content:space-between;gap:12px;font-size:10px}.row span{color:var(--muted)}.row b{text-align:right;max-width:70%}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.check{display:flex;justify-content:space-between;border:1px solid var(--line);padding:9px;border-radius:10px;font-size:10px}.yes{color:var(--green);font-weight:950}.no{color:var(--muted);font-weight:800}
+.reason{display:grid;gap:7px}.reason div{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;font-size:10px}
+.notice{padding:11px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);font-size:10px;background:#fbfcfe}.error{display:none;background:#fff0f2;border:1px solid #f1c5cc;color:var(--red);padding:12px;border-radius:12px;font-size:11px;margin-bottom:12px}.footer{text-align:center;color:var(--muted);font-size:9px;padding:18px 4px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.trade{grid-template-columns:repeat(2,1fr)}.topRight .live{display:none}.heroRow{align-items:flex-start}.price{font-size:30px}.signal{font-size:19px;padding:10px 14px;min-width:94px}.checks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><div class="logo">🥇</div><div><div class="title">XAUUSD H1 SWING</div><div class="sub">Confirmed H1 breakout · No retest · Swing only</div></div></div>
+  <div class="topRight"><div class="live"><span class="dot"></span><span id="liveText">LIVE</span></div><button onclick="load()">Refresh</button></div>
+</header>
+
+<div id="err" class="error"></div>
+
+<section class="hero">
+  <div class="heroRow">
+    <div><div class="tiny">XAU/USD · LIVE PRICE</div><div id="price" class="price">—</div><div id="updated" class="tiny">Loading…</div></div>
+    <div style="text-align:right"><div id="signal" class="signal wait">WAIT</div><div class="tiny" style="margin-top:7px">Confidence <b id="confidence">—</b></div></div>
+  </div>
+  <div class="meta">
+    <div id="bias" class="pill">BIAS —</div>
+    <div id="strength" class="pill">STRENGTH —</div>
+    <div id="breakoutStatus" class="pill">H1 BREAKOUT —</div>
+    <div id="session" class="pill">SESSION —</div>
+  </div>
+</section>
+
+<div class="grid">
+<section class="card full">
+  <div class="ct"><h2>H1 Swing Trade Plan</h2><span id="planBadge" class="badge">WAIT</span></div>
+  <div class="trade">
+    <div class="item"><span>ENTRY</span><b id="entry">—</b></div>
+    <div class="item"><span>STOP LOSS</span><b id="sl">—</b></div>
+    <div class="item"><span>TP1</span><b id="tp1">—</b></div>
+    <div class="item"><span>TP2</span><b id="tp2">—</b></div>
+    <div class="item"><span>TP3</span><b id="tp3">—</b></div>
+  </div>
+  <div class="meta">
+    <div id="rr" class="pill">RR —</div><div id="risk" class="pill">RISK —</div><div id="target" class="pill">TARGET —</div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="ct"><h2>Breakout Confirmation</h2><span class="badge">H1 ONLY</span></div>
+  <div class="rows">
+    <div class="row"><span>Direction</span><b id="boDir">—</b></div>
+    <div class="row"><span>Broken Swing</span><b id="boLevel">—</b></div>
+    <div class="row"><span>Breakout Candle</span><b id="boTime">—</b></div>
+    <div class="row"><span>Break Distance</span><b id="boDist">—</b></div>
+    <div class="row"><span>Distance / ATR</span><b id="boAtr">—</b></div>
+    <div class="row"><span>Body / ATR</span><b id="boBody">—</b></div>
+    <div class="row"><span>Body Ratio</span><b id="boRatio">—</b></div>
+    <div class="row"><span>Close Strength</span><b id="boClose">—</b></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="ct"><h2>H1 Market Structure</h2><span class="badge">CONTEXT</span></div>
+  <div class="rows">
+    <div class="row"><span>Structure Bias</span><b id="structureBias">—</b></div>
+    <div class="row"><span>Last H1 Close</span><b id="h1close">—</b></div>
+    <div class="row"><span>Last Candle</span><b id="h1time">—</b></div>
+    <div class="row"><span>Swing High</span><b id="sHigh">—</b></div>
+    <div class="row"><span>Swing Low</span><b id="sLow">—</b></div>
+    <div class="row"><span>High Pattern</span><b id="highPattern">—</b></div>
+    <div class="row"><span>Low Pattern</span><b id="lowPattern">—</b></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="ct"><h2>Trend & Momentum</h2><span class="badge">H1</span></div>
+  <div class="rows">
+    <div class="row"><span>EMA20</span><b id="ema20">—</b></div>
+    <div class="row"><span>EMA50</span><b id="ema50">—</b></div>
+    <div class="row"><span>EMA200</span><b id="ema200">—</b></div>
+    <div class="row"><span>ATR14</span><b id="atr">—</b></div>
+    <div class="row"><span>RSI14</span><b id="rsi">—</b></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="ct"><h2>Signal Quality</h2><span id="scoreBadge" class="badge">—</span></div>
+  <div class="checks" id="checks"></div>
+</section>
+
+<section class="card full">
+  <div class="ct"><h2>Why This Signal</h2><span class="badge">ENGINE REASONING</span></div>
+  <div id="reasons" class="reason"></div>
+</section>
+
+<section class="card full">
+  <div class="ct"><h2>Invalidation</h2><span class="badge">RISK</span></div>
+  <div id="invalidation" class="notice">—</div>
+</section>
+
+<section class="card full">
+  <div class="ct"><h2>Engine Rules</h2><span class="badge">SWING ONLY</span></div>
+  <div class="notice">Trigger = confirmed H1 candle CLOSE beyond a confirmed H1 swing high/low. Wick-only breaks do not trigger. Retest is NOT required. M5/M15/zone/scalp engines are not used.</div>
+</section>
+</div>
+<div class="footer">XAUUSD H1 Swing Breakout · Updated <span id="footerTime">—</span></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>Number.isFinite(+v)?(+v).toFixed(d):"—";
+function setText(id,v){$(id).textContent=v==null?"—":v}
+function signalClass(s){return s==="BUY"?"buy":s==="SELL"?"sell":"wait"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+async function load(){
+  $("liveText").textContent="LOADING";
+  $("err").style.display="none";
+  try{
+    const r=await fetch("/api/scalp?t="+Date.now(),{cache:"no-store"});
+    const d=await r.json();
+    if(!r.ok||!d.ok) throw new Error(d.error||"API error");
+    render(d);
+  }catch(e){
+    $("err").textContent=e.message||"Failed to load";
+    $("err").style.display="block";
+  }finally{
+    $("liveText").textContent="LIVE";
+  }
+}
+
+function render(d){
+  const s=d.signal, st=d.setup||{}, b=d.breakout||{}, h=d.h1||{}, str=h.structure||{}, c=st.checks||{};
+  $("signal").textContent=s;
+  $("signal").className="signal "+signalClass(s);
+  setText("confidence",d.confidence!=null?d.confidence+" / 100":"—");
+  setText("price",fmt(d.livePrice,2));
+  setText("updated",new Date(d.timestamp).toLocaleString());
+  setText("bias",`BIAS ${d.bias||"—"}`);
+  setText("strength",`STRENGTH ${d.signalStrength||"WAIT"}`);
+  setText("breakoutStatus",`H1 BREAKOUT ${b.active?"ACTIVE":"WAIT"}`);
+  setText("session",`SESSION ${d.session?.name||"—"}`);
+
+  $("planBadge").textContent=s;
+  setText("entry",fmt(st.entry));
+  setText("sl",fmt(st.stopLoss));
+  setText("tp1",fmt(st.tp1));
+  setText("tp2",fmt(st.tp2));
+  setText("tp3",fmt(st.tp3));
+  setText("rr",`RR ${fmt(st.rr,2)}`);
+  setText("risk",st.risk!=null?`RISK ${fmt(st.risk,2)}`:"RISK —");
+  setText("target",st.target?`TARGET ${fmt(st.target)} · ${st.targetType||""}`:"TARGET —");
+
+  setText("boDir",b.direction);
+  setText("boLevel",b.level!=null?fmt(b.level):"—");
+  setText("boTime",b.candle?.time||"—");
+  setText("boDist",b.distance!=null?fmt(b.distance):"—");
+  setText("boAtr",b.breakoutATR!=null?fmt(b.breakoutATR,3):"—");
+  setText("boBody",b.bodyATR!=null?fmt(b.bodyATR,3):"—");
+  setText("boRatio",b.bodyRatio!=null?(+b.bodyRatio*100).toFixed(0)+"%":"—");
+  setText("boClose",b.closeLocation!=null?(+b.closeLocation*100).toFixed(0)+"%":"—");
+
+  setText("structureBias",str.bias);
+  setText("h1close",fmt(h.last));
+  setText("h1time",h.time||"—");
+  setText("sHigh",str.swingHigh?fmt(str.swingHigh.price):"—");
+  setText("sLow",str.swingLow?fmt(str.swingLow.price):"—");
+  setText("highPattern",str.priorHighPattern);
+  setText("lowPattern",str.priorLowPattern);
+
+  setText("ema20",fmt(h.ema20));
+  setText("ema50",fmt(h.ema50));
+  setText("ema200",fmt(h.ema200));
+  setText("atr",fmt(h.atr));
+  setText("rsi",fmt(h.rsi));
+
+  $("scoreBadge").textContent=(st.score??0)+" / 100";
+  $("checks").innerHTML=Object.entries(c).map(([k,v])=>`<div class="check"><span>${label(k)}</span><b class="${v?"yes":"no"}">${v?"YES":"NO"}</b></div>`).join("");
+
+  $("reasons").innerHTML=(st.reasons||["Waiting for a new H1 breakout."]).map(x=>`<div>${esc(x)}</div>`).join("");
+  $("invalidation").textContent=st.invalidation||"—";
+  $("footerTime").textContent=new Date().toLocaleTimeString();
+}
+
+function label(k){
+  return ({
+    h1Breakout:"H1 breakout",
+    breakoutBody:"Breakout body",
+    breakoutDistance:"Break distance",
+    closeStrength:"Close strength",
+    ema20Alignment:"EMA20 alignment",
+    ema50Alignment:"EMA50 alignment",
+    ema200Alignment:"EMA200 alignment",
+    rsiConfirmation:"RSI confirmation",
+    roomToTarget:"Room to target"
+  })[k]||k;
+}
+load();
+setInterval(load,60000);
+</script>
+</body>
+</html>
