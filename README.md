@@ -1,15 +1,30 @@
-# XAUUSD H1 Swing Breakout
+# XAUUSD Trend Following Dashboard V2
 
-H1 swing-only engine for XAU/USD.
+A new Vercel-ready XAU/USD dashboard built around H1 trend context and M15 pullback triggers. Trend Following standalone and Trend + SMC are evaluated independently.
 
-## Trigger
-- Confirmed H1 candle CLOSE beyond a confirmed H1 swing high/low.
-- Wick-only break does not trigger.
-- Retest is NOT required.
-- No M5/M15 scalp engine.
-- Entry is the breakout H1 close.
+## Features
+- Twelve Data live price and M5 candle feed, aggregated to closed M15 and H1 bars.
+- Interactive candlestick chart with EMA20/50/200 overlays, crosshair, zoom, scroll and structure/sweep markers.
+- H1 trend direction, EMA ordering and slope normalized by ATR.
+- Pullback zone calculated from EMA20/EMA50 and ATR, rejection and momentum checks.
+- Liquidity context: equal highs/lows, swing levels and sweep/reclaim checks.
+- Volatility regime and expansion/chasing warning.
+- Separate Trend Following and Trend + SMC setup cards with entry, SL, TP1, TP2, R:R, checks, reasons and invalidation.
+- Browser-local signal ledger. Outcomes are manually marked; they are not fabricated.
 
-## Signal quality
-Scores breakout displacement, close strength, EMA20/50/200 alignment, RSI, and room to the next confirmed H1 swing target.
+## Deploy to Vercel
+1. Import this repository into Vercel.
+2. Set `TWELVE_DATA_API_KEY` under Project Settings → Environment Variables.
+3. Redeploy after setting the key.
+4. Open the deployment URL. The chart uses Lightweight Charts from a CDN, so the client needs internet access.
 
-Set `TWELVE_DATA_API_KEY` in Vercel.
+## Important implementation notes
+- API route: `/api/scalp`.
+- Signal analysis uses closed M15 candles; H1 provides trend context.
+- The feed requests up to 5,000 M5 bars. Actual returned history depends on Twelve Data plan/limits.
+- The browser ledger is stored in localStorage on that browser only. It is not a shared database and does not replace a true historical backtest.
+- Performance statistics shown in the UI are based only on outcomes manually recorded by the user. No win rate is guaranteed.
+- Validate data timestamps, broker spread, slippage, timezone/session handling and out-of-sample performance before live trading.
+
+## Local syntax check
+`npm run check`

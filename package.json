@@ -1,7 +1,1 @@
-{
-  "name":"xauusd-h1-swing-breakout",
-  "version":"1.0.0",
-  "private":true,
-  "type":"module",
-  "scripts":{"check":"node --check api/scalp.js"}
-}
+{"name":"xauusd-trend-following-dashboard","version":"2.0.0","private":true,"type":"module","scripts":{"check":"node --check api/scalp.js"}}
